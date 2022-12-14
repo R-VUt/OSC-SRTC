@@ -1,0 +1,15 @@
+{
+	"osc_ip" : "127.0.0.1",
+	"osc_port" : 9000,
+	
+	"osc_serv_ip" : "127.0.0.1",
+	"osc_serv_port" : 9001,
+	
+	"azure_key" : "",
+	"azure_location" : "",
+	
+	"etri_key" : "",
+	
+	"papago_id" : "",
+	"papago_secret" : ""
+}

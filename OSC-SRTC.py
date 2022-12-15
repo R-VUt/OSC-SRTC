@@ -9,8 +9,7 @@ from pythonosc import udp_client, osc_server, dispatcher
 import deepl 
 import sys
 import urllib
-import winsound
-
+from playsound import playsound
 
 lang_list = ["English", "Korean", "Japanese", "Chinese (simplified)", "Chinese (traditional)", "French", "Spanish", "Italian", "Russian", "Ukrainian", "German", "Arabic", "Thai", "Tagalog", "Bahasa Malaysia", "Bahasa Indonesia", "Hindi", "Hebrew", "Turkish", "Portuguese", "Croatian", "Dutch"]
 
@@ -163,7 +162,7 @@ def mainfunc():
             if stop_event.is_set():
                 break
             
-            winsound.PlaySound(resource_path("resources/1.wav"), winsound.SND_FILENAME | winsound.SND_ASYNC)
+            playsound(resource_path("resources/1.wav"), block=False)
             print("[Info] Listening...")
             try:
                 audio = r.listen(source, timeout=20, phrase_time_limit=20, stopper=stop_event)

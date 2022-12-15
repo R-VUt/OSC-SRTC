@@ -1,4 +1,5 @@
 deepl==1.11.0
 googletrans==3.0.0
 python-osc==1.8.0
+playsound==1.3.0
 git+https://github.com/soumt-r/speech_recognition_KR_APIs

@@ -1,4 +1,5 @@
 import json
+import time
 from tkinter import *
 import  tkinter.ttk as ttk
 import os
@@ -43,6 +44,9 @@ speechBox = None
 translatorBox = None
 
 onoff = False
+PTTmode = False
+PTT_end = threading.Event()
+PTT_end.set()
 stop_event = threading.Event()
 
 
@@ -144,9 +148,50 @@ def checkBoxChanged(*args):
             print("[Error] Not supported Language in ETRI mode")
             speechBox.current(0)
 
+def recognize_and_send(r, audio):
+    try:
+        print("[Info] Recognizing...")
+        if speech_recog_list[speechBox.current()] == "Google WebSpeech":
+            text = r.recognize_google(audio, language=lang_code[sourceBox.current()])
+        elif speech_recog_list[speechBox.current()] == "Azure Speech Cognitive":
+            text = r.recognize_azure(audio, key=azure_key, location=azure_location, language=azure_code[sourceBox.current()])[0]
+        elif speech_recog_list[speechBox.current()] == "ETRI":
+            if whisper_code[sourceBox.current()] in etri_code:
+                text = r.recognize_etri(audio, etri_key, whisper_code[sourceBox.current()])
+        
+        print("[Info] Recognized: " + text)
+        
+        if sourceBox.current() != targetBox.current():
+            if translator_list[translatorBox.current()] == "Deepl":
+                source_lang = lang_code[sourceBox.current()]
+                target_lang = lang_code[targetBox.current()]
+
+                if target_lang == "zh-CN":
+                    target_lang = "ZH"
+                if source_lang == "zh-CN":
+                    source_lang = "ZH"
+
+                text = deepl.translate(source_language=source_lang, target_language=target_lang, text=text)
+            elif translator_list[translatorBox.current()] == "Papago":
+                source_lang = lang_code[sourceBox.current()].lower()
+                target_lang = lang_code[targetBox.current()].lower()
+
+                text = papago_translate(source=source_lang, target=target_lang, text=text)
+            elif translator_list[translatorBox.current()] == "Google Translate":
+                translator = Translator()
+                translated = translator.translate(text, dest=lang_code[targetBox.current()])
+                text = translated.text
+        
+        print("[Info] Output: " + text)
+        print()
+        
+        client.send_message("/chatbox/input", [text, True])
+    except:
+        print("[Err] Couldn't recognize")
+        print()
+
 
 def mainfunc():
-    
     os.system("cls")
     print("[Info] OSChat-SRTC Thread started")
 
@@ -161,11 +206,22 @@ def mainfunc():
         with sr.Microphone(device_index=combobox.current()) as source:
             if stop_event.is_set():
                 break
+            if PTTmode == True:
+                while PTT_end.is_set():
+                    if stop_event.is_set():
+                        break
+                    time.sleep(0.1)
+                if stop_event.is_set():
+                    break
             
-            playsound(resource_path("resources/1.wav"), block=False)
+            
+            playsound(resource_path("resources\\1.wav").replace("\\", "/"), block=False)
             print("[Info] Listening...")
             try:
-                audio = r.listen(source, timeout=20, phrase_time_limit=20, stopper=stop_event)
+                if PTTmode == False:
+                    audio = r.listen(source, timeout=20, phrase_time_limit=20, stopper=stop_event)
+                else:
+                    audio = r.listen(source, timeout=20, phrase_time_limit=20, stopper=stop_event, ptt_end=PTT_end)
             except sr.WaitTimeoutError:
                 print("[Info] Speech Recognition Timeout")
                 print("")
@@ -176,47 +232,7 @@ def mainfunc():
             
             if stop_event.is_set():
                 break
-            try:
-            #if True:
-                print("[Info] Recognizing...")
-                if speech_recog_list[speechBox.current()] == "Google WebSpeech":
-                    text = r.recognize_google(audio, language=lang_code[sourceBox.current()])
-                elif speech_recog_list[speechBox.current()] == "Azure Speech Cognitive":
-                    text = r.recognize_azure(audio, key=azure_key, location=azure_location, language=azure_code[sourceBox.current()])[0]
-                elif speech_recog_list[speechBox.current()] == "ETRI":
-                    if whisper_code[sourceBox.current()] in etri_code:
-                        text = r.recognize_etri(audio, etri_key, whisper_code[sourceBox.current()])
-               
-                print("[Info] Recognized: " + text)
-                
-                if sourceBox.current() != targetBox.current():
-                    if translator_list[translatorBox.current()] == "Deepl":
-                        source_lang = lang_code[sourceBox.current()]
-                        target_lang = lang_code[targetBox.current()]
-
-                        if target_lang == "zh-CN":
-                            target_lang = "ZH"
-                        if source_lang == "zh-CN":
-                            source_lang = "ZH"
-
-                        text = deepl.translate(source_language=source_lang, target_language=target_lang, text=text)
-                    elif translator_list[translatorBox.current()] == "Papago":
-                        source_lang = lang_code[sourceBox.current()].lower()
-                        target_lang = lang_code[targetBox.current()].lower()
-
-                        text = papago_translate(source=source_lang, target=target_lang, text=text)
-                    elif translator_list[translatorBox.current()] == "Google Translate":
-                        translator = Translator()
-                        translated = translator.translate(text, dest=lang_code[targetBox.current()])
-                        text = translated.text
-                
-                print("[Info] Output: " + text)
-                print()
-                
-                client.send_message("/chatbox/input", [text, True])
-            except:
-                print("[Err] Couldn't recognize")
-                print()
+            recognize_and_send(r, audio)
 
     print("[Info] OSChat-SRTC Thread terminated")
 
@@ -374,12 +390,35 @@ def set_on_off(*data):
         if onoff == True:
             stop()
 
+def set_PTTmode(*data):
+    (link, mode) = data
+
+    global PTTmode
+    PTTmode = mode
+
+def set_PTT(*data):
+    (link, PTT) = data
+
+    global PTT_end
+    if PTT == True:
+        print("[INFO] PTT Start")
+        PTT_end.clear()
+    else:
+        print("[INFO] PTT End")
+        PTT_end.set()
+
+
+
             
 check_api_settings()
 disp = dispatcher.Dispatcher()
 disp.map("/avatar/parameters/SRTC/TLang", set_target_lang)
 disp.map("/avatar/parameters/SRTC/SLang", set_source_lang)
 disp.map("/avatar/parameters/SRTC/OnOff", set_on_off)
+
+disp.map("/avatar/parameters/SRTC/PTTMode", set_PTTmode)
+disp.map("/avatar/parameters/SRTC/PTT", set_PTT)
+
 server = osc_server.ThreadingOSCUDPServer((osc_serv_ip, osc_serv_port), disp)
 threading.Thread(target=server.serve_forever).start()
 

@@ -1,5 +1,8 @@
 import json
 import time
+#import beautifulsoup
+import bs4 as bs
+import requests
 from tkinter import *
 import  tkinter.ttk as ttk
 import os
@@ -11,6 +14,10 @@ import deepl
 import sys
 import urllib
 from playsound import playsound
+from pykakasi import kakasi
+
+nowversion = "10"
+url = "https://rera-c.booth.pm/items/4217922"
 
 lang_list = ["English", "Korean", "Japanese", "Chinese (simplified)", "Chinese (traditional)", "French", "Spanish", "Italian", "Russian", "Ukrainian", "German", "Arabic", "Thai", "Tagalog", "Bahasa Malaysia", "Bahasa Indonesia", "Hindi", "Hebrew", "Turkish", "Portuguese", "Croatian", "Dutch"]
 
@@ -39,9 +46,11 @@ button_stat = None
 combobox = None
 sourceBox = None
 targetBox = None
-deeplModeCheck = None
+romajiModeCheck = None
 speechBox = None
 translatorBox = None
+
+romajiMode = None
 
 onoff = False
 PTTmode = False
@@ -49,6 +58,30 @@ PTT_end = threading.Event()
 PTT_end.set()
 stop_event = threading.Event()
 
+
+converter = kakasi()
+
+def check_update():
+  try:
+    source = requests.get(url).text
+    soup = bs.BeautifulSoup(source, 'html.parser')
+
+    modules = soup.find('script', id='json_modules')
+    
+    data = json.loads(modules.string)
+    for section in data['modules']:
+      if section['title'] == 'RCUPDCHK':
+        print('Checking for updates...')
+        print('---------------------------------')
+        if section['content'] == nowversion:
+            print("You are using the latest version.")
+        else:
+            print("There is a new version available.")
+            print("Go to " + url + " to download the new version.")
+        print('---------------------------------')
+
+  except:
+    print("couldn't check for updates" )
 
 def resource_path(relative_path):
     try:
@@ -120,11 +153,15 @@ def papago_translate(source, target, text):
 def checkBoxChanged(*args):
     client.send_message("/avatar/parameters/SRTC/TLang", targetBox.current())
     client.send_message("/avatar/parameters/SRTC/SLang", sourceBox.current())
+    
+    source_lang = lang_code[sourceBox.current()]
+    target_lang = lang_code[targetBox.current()]
+
+    if target_lang.lower() == "ja":
+        romajiModeCheck.config(state=NORMAL)
 
     if translator_list[translatorBox.current()] == "Deepl":
         
-        source_lang = lang_code[sourceBox.current()]
-        target_lang = lang_code[targetBox.current()]
 
         if source_lang == "zh-CN":
             source_lang = "ZH"
@@ -182,6 +219,12 @@ def recognize_and_send(r, audio):
                 translated = translator.translate(text, dest=lang_code[targetBox.current()])
                 text = translated.text
         
+        if lang_code[targetBox.current()].lower() == "ja" and romajiMode.get() == 1:
+            tmp = ""
+            for i in converter.convert(text):
+                tmp += i['hepburn'] + " "
+            text = tmp
+            
         print("[Info] Output: " + text)
         print()
         
@@ -279,14 +322,16 @@ def main_window():
     global combobox
     global sourceBox
     global targetBox
-    global deeplModeCheck
+    global romajiModeCheck
     global speechBox
     global translatorBox
+
+    global romajiMode
 
     tk = Tk()
     tk.iconbitmap(resource_path("resources/logo.ico"))
     tk.title("OSC-SRTC")
-    tk.geometry("220x240")
+    tk.geometry("220x260")
     #tk.resizable(0, 0)
 
     mic_label = Label(tk, text="Microphone")
@@ -316,6 +361,10 @@ def main_window():
     speechBox.current(0)
     translatorBox.current(0)
 
+    romajiMode = IntVar()
+    romajiModeCheck = Checkbutton(tk, text="Romaji Mode (Ja)", variable=romajiMode)
+    romajiModeCheck.config(state=DISABLED)
+
     speech_label.pack()
     speechBox.pack()
 
@@ -330,6 +379,8 @@ def main_window():
 
     target_label.pack()
     targetBox.pack()
+
+    romajiModeCheck.pack()
 
     button_stat = Button(tk, text="Start", command=lambda: start())
     button_stat.pack()
@@ -409,8 +460,9 @@ def set_PTT(*data):
 
 
 
-            
+check_update()
 check_api_settings()
+
 disp = dispatcher.Dispatcher()
 disp.map("/avatar/parameters/SRTC/TLang", set_target_lang)
 disp.map("/avatar/parameters/SRTC/SLang", set_source_lang)

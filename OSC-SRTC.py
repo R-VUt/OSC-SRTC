@@ -1,505 +1,327 @@
-import json
-import os
-import sys
 import threading
 import time
 import tkinter.ttk as ttk
-import typing
-import urllib
 from tkinter import *
-from typing import Any
-
-# import beautifulsoup
-import bs4 as bs
-import deepl
-import requests
-import speech_recognition as sr
-from googletrans import Translator
-from playsound import playsound
-from pykakasi import kakasi
 from pythonosc import udp_client, osc_server, dispatcher
+from pykakasi import kakasi
 
-now_version: str = "10"
-url: str = "https://rera-c.booth.pm/items/4217922"
-
-lang_list: list[str | Any] = ["English", "Korean", "Japanese", "Chinese (simplified)", "Chinese (traditional)",
-                              "French", "Spanish", "Italian", "Russian", "Ukrainian", "German", "Arabic", "Thai",
-                              "Tagalog", "Bahasa Malaysia", "Bahasa Indonesia", "Hindi", "Hebrew", "Turkish",
-                              "Portuguese", "Croatian", "Dutch"]
-
-lang_code: list[str | Any] = ["EN", "ko", "JA", "zh-CN", "zh-TW", "FR", "ES", "IT", "RU", "uk", "DE", "ar", "th", "tl",
-                              "ms", "id", "hi", "he", "tr", "PT", "hr", "NL"]
-azure_code: list[str | Any] = ["en-US", "ko-KR", "ja-JP", "zh-CN", "zh-TW", "fr-FR", "es-ES", "it-IT", "ru-RU", "uk-UA",
-                               "de-DE", "ar-SA", "th-TH", "tl-PH", "ms-MY", "id-ID", "hi-IN", "he-IL", "tr-TR", "pt-PT",
-                               "hr-HR", "nl-NL"]
-deepl_code: list[str | Any] = ["EN", "JA", "FR", "DE", "ES", "IT", "NL", "PL", "PT", "RU", "ZH"]
-papago_code: list[str] = ["en", "ko", "ja", "zh-CN", "zh-TW", "fr", "es", "it", "ru", "de"]
-whisper_code: list[str | Any] = ["english", "korean", "japanese", "chinese", "chinese", "french", "spanish", "italian",
-                                 "russian", "ukrainian", "german", "arabic", "thai", "tagalog", "malay", "indonesian",
-                                 "hindi", "hebrew", "turkish", "portuguese", "croatian", "dutch"]
-etri_code: list[str | Any] = ["korean", "english", "chinese", "japanese", "dutch", "spanish", "russian", "vietnamese",
-                              "arabic", "thai", "italian", "malay"]
-
-speech_recognize_list: list[str] = ["Google WebSpeech"]
-translator_list: list[str] = ["Google Translate", "Deepl"]
-
-azure_key: str = ""
-azure_location: str = ""
-papago_id: str = ""
-papago_secret: str = ""
-etri_key: str = ""
-osc_ip: str = "127.0.0.1"
-osc_port: int = 9000
-osc_serv_ip: str = "127.0.0.1"
-osc_serv_port: int = 9001
-
-tk = None
-button_stat = None
-combobox = None
-sourceBox = None
-targetBox = None
-romajiModeCheck = None
-speechBox = None
-translatorBox = None
-
-romajiMode = None
-
-is_enable: bool = False
-ptt_mode: bool = False
-ptt_end = threading.Event()
-ptt_end.set()
-stop_event: Event = threading.Event()
-
-converter: kakasi = kakasi()
+from modules.SRTC_Utils import *
+from modules.SRTC_Recognizer import SRecognizer
+from modules.SRTC_Translator import STranslator
 
 
-def check_update() -> typing.NoReturn:
-    try:
-        source = requests.get(url).text
-        soup = bs.BeautifulSoup(source, 'html.parser')
+Supported_Languages: list[str] = ["English", "Korean", "Japanese", "Chinese (simplified)", "Chinese (traditional)",
+                       "French", "Spanish", "Italian", "Russian", "Ukrainian", "German", "Arabic", "Thai",
+                       "Tagalog", "Bahasa Malaysia", "Bahasa Indonesia", "Hindi", "Hebrew", "Turkish",
+                       "Portuguese", "Croatian", "Dutch"]
 
-        modules = soup.find('script', id='json_modules')
+OSC_Send_IP = "127.0.0.1"
+OSC_Send_Port = 9000
+OSC_Recv_IP = "127.0.0.1"
+OSC_Recv_Port = 9001
 
-        data = json.loads(modules.string)
-        for section in data['modules']:
-            if section['title'] == 'RCUPDCHK':
-                print('Checking for updates...')
-                print('---------------------------------')
-                if section['content'] == now_version:
-                    print("You are using the latest version.")
-                else:
-                    print("There is a new version available.")
-                    print("Go to " + url + " to download the new version.")
-                print('---------------------------------')
+TK: Tk = None
+Button_Start: Button = None
+Device_Selection: ttk.Combobox = None
+Recognizer_Selection: ttk.Combobox = None
+Translator_Selection: ttk.Combobox = None
+Source_Selection: ttk.Combobox = None
+Target_Selection: ttk.Combobox = None
+Target2_Selection: ttk.Combobox = None
 
-    except:
-        print("couldn't check for updates")
+Romaji_Mode: IntVar = None
 
+Recognizer: SRecognizer = None
+Translator: STranslator = None
 
-def resource_path(relative_path: str) -> str:
-    try:
-        base_path = sys._MEIPASS
-    except Exception:
-        base_path = os.path.abspath(".")
-    return os.path.join(base_path, relative_path)
+OSC_Client: udp_client.SimpleUDPClient = None
+OSC_Server: osc_server.ThreadingOSCUDPServer = None
 
+is_running: bool = False
+is_ptt: bool = False
 
-def check_api_settings() -> typing.NoReturn:
-    global azure_key
-    global azure_location
-    global papago_id
-    global papago_secret
-    global etri_key
+Stop_Event: threading.Event = threading.Event()
+PTT_End = threading.Event()
+PTT_End.set()
 
-    global osc_ip
-    global osc_port
-    global osc_serv_ip
-    global osc_serv_port
+# OSC Server Functions
+def OSC_SetTarget(*data):
+    (link, lang_id) = data
 
-    if os.path.isfile("api_settings.json"):
-
-        with open("./api_settings.json", "r") as f:
-            api_settings = json.load(f)
-
-            if api_settings.get("osc_ip") and api_settings.get("osc_port") and api_settings["osc_ip"] != "" and \
-                    api_settings["osc_port"] != "":
-                osc_ip = api_settings["osc_ip"]
-                osc_port = api_settings["osc_port"]
-                print('[Info] Found OSC IP and Port in api_settings.json')
-
-            if api_settings.get("osc_serv_ip") and api_settings.get("osc_serv_port") and api_settings[
-                "osc_serv_ip"] != "" and api_settings["osc_serv_port"] != "":
-                osc_serv_ip = api_settings["osc_serv_ip"]
-                osc_serv_port = api_settings["osc_serv_port"]
-                print('[Info] Found OSC Server IP and Port in api_settings.json')
-
-            if api_settings.get("azure_key") and api_settings.get("azure_location") and api_settings[
-                "azure_key"] != "" and api_settings["azure_location"] != "":
-                speech_recognize_list.append("Azure Speech Cognitive")
-                azure_key = api_settings["azure_key"]
-                azure_location = api_settings["azure_location"]
-                print("[Info] Found API Key from settings : Azure Speech Cognitive API is enabled")
-
-            if api_settings.get("papago_id") and api_settings.get("papago_secret") and api_settings[
-                "papago_id"] != "" and api_settings["papago_secret"] != "":
-                translator_list.append("Papago")
-                papago_id = api_settings["papago_id"]
-                papago_secret = api_settings["papago_secret"]
-                print("[Info] Found API Key from settings : Papago API is enabled")
-
-            if api_settings.get("etri_key") and api_settings["etri_key"] != "":
-                speech_recognize_list.append("ETRI")
-                etri_key = api_settings["etri_key"]
-                print("[Info] Found API Key from settings : ETRI API is enabled")
+    global Target_Selection
+    if Target_Selection.current() != int(lang_id):
+        Target_Selection.current(int(lang_id))
+        option_changed()
 
 
-def papago_translate(source, target, text):
-    encText = urllib.parse.quote(text)
-    data: str = "source=" + source + "&target=" + target + "&text=" + encText
-    papago_url: str = "https://openapi.naver.com/v1/papago/n2mt"
-    request = urllib.request.Request(papago_url)
-    request.add_header("X-Naver-Client-Id", papago_id)
-    request.add_header("X-Naver-Client-Secret", papago_secret)
-    response = urllib.request.urlopen(request, data=data.encode("utf-8"))
-    res_code = response.getcode()
-    if res_code == 200:
-        response_body = response.read()
-        translated = json.loads(response_body.decode('utf-8'))
-        return translated['message']['result']['translatedText']
+def OSC_SetSource(*data):
+    (link, lang_id) = data
+
+    global Source_Selection
+    if Source_Selection.current() != int(lang_id):
+        Source_Selection.current(int(lang_id))
+        option_changed()
+
+
+def OSC_SetOnOff(*data):
+    (link, on_off) = data
+
+    global is_running
+    if on_off:
+        if not is_running:
+            start_main_thread()
     else:
-        return -1
+        if is_running:
+            stop_main_thread()
 
 
-def check_box_changed(*args) -> typing.NoReturn:
-    client.send_message("/avatar/parameters/SRTC/TLang", targetBox.current())
-    client.send_message("/avatar/parameters/SRTC/SLang", sourceBox.current())
+def OSC_SetPTT(*data):
+    (link, mode) = data
 
-    source_lang = lang_code[sourceBox.current()]
-    target_lang = lang_code[targetBox.current()]
-
-    if target_lang.lower() == "ja":
-        romajiModeCheck.config(state=NORMAL)
-
-    if translator_list[translatorBox.current()] == "Deepl":
-
-        if source_lang == "zh-CN":
-            source_lang = "ZH"
-        if target_lang == "zh-CN":
-            target_lang = "ZH"
-
-        if source_lang not in deepl_code or target_lang not in deepl_code:
-            print("[Error] Not supported Language in Deepl mode")
-            translatorBox.current(0)
-
-    elif translator_list[translatorBox.current()] == "Papago":
-        source_lang = lang_code[sourceBox.current()]
-        target_lang = lang_code[targetBox.current()]
-
-        if source_lang.lower() not in papago_code or target_lang.lower() not in papago_code:
-            print("[Error] Not supported Language in Papago mode")
-            translatorBox.current(0)
-
-    if speech_recognize_list[speechBox.current()] == "ETRI":
-        if whisper_code[sourceBox.current()] not in etri_code:
-            print("[Error] Not supported Language in ETRI mode")
-            speechBox.current(0)
+    global is_ptt
+    is_ptt = mode
+    option_changed()
 
 
-def recognize_and_send(r, audio):
+
+def OSC_PTTButton(*data):
+    (link, ptt) = data
+
+    global PTT_End
+    if ptt:
+        print("[INFO] PTT Start")
+        PTT_End.clear()
+    else:
+        print("[INFO] PTT End")
+        PTT_End.set()
+# End of OSC Server Functions
+
+def initialize():
+  global Recognizer
+  global Translator
+
+  global OSC_Client
+  global OSC_Server
+
+  global OSC_Send_IP
+  global OSC_Send_Port
+  global OSC_Recv_IP
+  global OSC_Recv_Port
+
+  print("OSC-SRTC v4")
+  print("Initializing...")
+
+  settings = load_settings()
+
+  if settings.get("osc_ip"):
+    OSC_Send_IP = settings.get("osc_ip")
+  if settings.get("osc_port"):
+    OSC_Send_Port = settings.get("osc_port")
+  if settings.get("osc_serv_ip"):
+    OSC_Recv_IP = settings.get("osc_serv_ip")
+  if settings.get("osc_serv_port"):
+    OSC_Recv_Port = settings.get("osc_serv_port")
+
+  Recognizer = SRecognizer(settings)
+  Translator = STranslator(settings)
+
+  OSC_Client = udp_client.SimpleUDPClient(OSC_Send_IP, OSC_Send_Port)
+
+def option_changed(*args):
+  OSC_Client.send_message("/avatar/parameters/SRTC/SLang", Source_Selection.current())
+  OSC_Client.send_message("/avatar/parameters/SRTC/TLang", Target_Selection.current())
+  
+  source_lang = Supported_Languages[Source_Selection.current()]
+  target_lang = Supported_Languages[Target_Selection.current()]
+  target2_lang = Supported_Languages[Target2_Selection.current()-1] if Target2_Selection.current() != 0 else "None"
+
+  if not Recognizer.isLanguageSupported(Recognizer_Selection.current(), source_lang):
+    print("[Error] This recognizer does not support " + source_lang + " language.")
+    Recognizer_Selection.current(0)
+
+  if not Translator.isLanguageSupported(Translator_Selection.current(), source_lang):
+    print("[Error] This translator does not support " + source_lang + " language.")
+    Translator_Selection.current(0)
+  
+  if not Translator.isLanguageSupported(Translator_Selection.current(), target_lang):
+    print("[Error] This translator does not support " + target_lang + " language.")
+    Translator_Selection.current(0)
+
+  if target2_lang != "None" and not Translator.isLanguageSupported(Translator_Selection.current(), target2_lang):
+    print("[Error] This translator does not support " + target2_lang + " language.")
+    Translator_Selection.current(0)
+  
+  if is_running:
+    stop_main_thread()
+    time.sleep(0.2)
+    start_main_thread()
+
+  
+def main_thread():
+  clear_screen()
+  print("[Info] Main thread started.")
+
+  while not Stop_Event.is_set():
     try:
-        print("[Info] Recognizing...")
-        if speech_recognize_list[speechBox.current()] == "Google WebSpeech":
-            text = r.recognize_google(audio, language=lang_code[sourceBox.current()])
-        elif speech_recognize_list[speechBox.current()] == "Azure Speech Cognitive":
-            text = \
-                r.recognize_azure(audio, key=azure_key, location=azure_location,
-                                  language=azure_code[sourceBox.current()])[
-                    0]
-        elif speech_recognize_list[speechBox.current()] == "ETRI":
-            if whisper_code[sourceBox.current()] in etri_code:
-                text = r.recognize_etri(audio, etri_key, whisper_code[sourceBox.current()])
+      recognized = Recognizer.ListenAndRecognize(Recognizer_Selection.current(), Supported_Languages[Source_Selection.current()],
+                                                Stop_Event, Device_Selection.current(), is_ptt, PTT_End)
+      to_send_message = ""
 
-        print("[Info] Recognized: " + text)
+      if recognized != "":
+        print("[Info] Recognized: " + recognized)
+        
+        if Source_Selection.current() != Target_Selection.current():
+          print("[Info] Translating to Target 1...")
+          translated = Translator.Translate(Translator_Selection.current(), recognized, Supported_Languages[Source_Selection.current()],
+                                            Supported_Languages[Target_Selection.current()])
+        else:
+          translated = recognized
 
-        if sourceBox.current() != targetBox.current():
-            if translator_list[translatorBox.current()] == "Deepl":
-                source_lang = lang_code[sourceBox.current()]
-                target_lang = lang_code[targetBox.current()]
+        if Supported_Languages[Target_Selection.current()] == "Japanese" and Romaji_Mode.get() == 1:
+          translated = Translator.RomajiConvert(translated)
+        print("[Info] Translated to Target 1: " + translated)
+        to_send_message += translated
 
-                if target_lang == "zh-CN":
-                    target_lang = "ZH"
-                if source_lang == "zh-CN":
-                    source_lang = "ZH"
+        if Target2_Selection.current() != 0:
+          if Source_Selection.current() != Target2_Selection.current()-1:
 
-                text = deepl.translate(source_language=source_lang, target_language=target_lang, text=text)
-            elif translator_list[translatorBox.current()] == "Papago":
-                source_lang = lang_code[sourceBox.current()].lower()
-                target_lang = lang_code[targetBox.current()].lower()
+            print("[Info] Translating to Target 2...")
+            translated = Translator.Translate(Translator_Selection.current(), recognized, Supported_Languages[Source_Selection.current()],
+                                              Supported_Languages[Target2_Selection.current()-1])  
+          else:
+            translated = recognized
 
-                text = papago_translate(source=source_lang, target=target_lang, text=text)
-            elif translator_list[translatorBox.current()] == "Google Translate":
-                translator = Translator()
-                translated = translator.translate(text, dest=lang_code[targetBox.current()])
-                text = translated.text
+          if Supported_Languages[Target2_Selection.current()-1] == "Japanese" and Romaji_Mode.get() == 1:
+            translated = Translator.RomajiConvert(translated)
+          print("[Info] Translated to Target 2: " + translated)
+          to_send_message += " (" + translated + ")"
+          
 
-        if lang_code[targetBox.current()].lower() == "ja" and romajiMode.get() == 1:
-            tmp = ""
-            for i in converter.convert(text):
-                tmp += i['hepburn'] + " "
-            text = tmp
-
-        print("[Info] Output: " + text)
-        print()
-
-        client.send_message("/chatbox/input", [text, True])
+        if to_send_message != "":
+          print("[Info] Sending message: " + to_send_message)
+          print(" ")
+          OSC_Client.send_message("/chatbox/input", [to_send_message, True])
     except:
-        print("[Err] Couldn't recognize")
-        print()
+      print("[Error] Could not recognize or translate.")
 
+          
+def start_main_thread():
+  global is_running
 
-def main():
-    os.system("cls")
-    print("[Info] OSChat-SRTC Thread started")
+  is_running = True
+  Button_Start.config(text="Stop", command=lambda: stop_main_thread())
+  Stop_Event.clear()
+  OSC_Client.send_message("/avatar/parameters/SRTC/OnOff", True)
 
-    r = sr.Recognizer()
-    '''with sr.Microphone(device_index=combobox.current()) as source:
-        print("[Info] Calibrating noise...")
-        r.adjust_for_ambient_noise(source)
-        print("[Info] Done")
-        print("")
-    '''
-    while True:
-        with sr.Microphone(device_index=combobox.current()) as source:
-            if stop_event.is_set():
-                break
-            if ptt_mode:
-                while ptt_end.is_set():
-                    if stop_event.is_set():
-                        break
-                    time.sleep(0.1)
-                if stop_event.is_set():
-                    break
+  is_alive = False
 
-            playsound(resource_path("resources\\1.wav").replace("\\", "/"), block=False)
-            print("[Info] Listening...")
-            try:
-                if not ptt_mode:
-                    audio = r.listen(source, timeout=20, phrase_time_limit=20, stopper=stop_event)
-                else:
-                    audio = r.listen(source, timeout=20, phrase_time_limit=20, stopper=stop_event, ptt_end=ptt_end)
-            except sr.WaitTimeoutError:
-                print("[Info] Speech Recognition Timeout")
-                print("")
-                continue
-            except sr.StopperSet:
-                print("[Info] Successfully stopped listening")
-                print("")
+  for thread in threading.enumerate():
+    if thread is not threading.current_thread() and thread.name == "OSC-SRTC":
+      is_alive = thread.is_alive()
 
-            if stop_event.is_set():
-                break
-            recognize_and_send(r, audio)
+  if not is_alive:
+    t = threading.Thread(target=main_thread, name="OSC-SRTC") #todo
+    t.daemon = True
+    t.start()
 
-    print("[Info] OSChat-SRTC Thread terminated")
+def stop_main_thread():
+  global is_running
 
+  is_running = False
+  Button_Start.config(text="Start", command=lambda: start_main_thread())
 
-def start():
-    global is_enable
-
-    is_enable = True
-    button_stat.config(text="Stop", command=lambda: stop())
-    stop_event.clear()
-    client.send_message("/avatar/parameters/SRTC/OnOff", is_enable)
-
-    is_alive = False
-
-    for thread in threading.enumerate():
-        if thread is threading.current_thread():
-            continue
-        if thread.name == "OSChat-SRTC":
-            is_alive = thread.is_alive()
-
-    if not is_alive:
-        t = threading.Thread(target=main, name="OSChat-SRTC")
-        t.daemon = True
-        t.start()
-
-
-def stop():
-    global is_enable
-
-    is_enable = False
-    button_stat.config(text="Start", command=lambda: start())
-
-    client.send_message("/avatar/parameters/SRTC/OnOff", is_enable)
-    stop_event.set()
-    print('[Info] Stopping...')
+  Stop_Event.set()
+  OSC_Client.send_message("/avatar/parameters/SRTC/OnOff", False)
+  print('[Info] Stopppping...')
 
 
 def on_closing():
-    stop_event.set()
-    tk.destroy()
-    os.kill(os.getpid(), 9)
-
+  Stop_Event.set()
+  TK.destroy()
+  os.kill(os.getpid(), 9)
 
 def main_window():
-    global tk
-    global button_stat
-    global combobox
-    global sourceBox
-    global targetBox
-    global romajiModeCheck
-    global speechBox
-    global translatorBox
+  global TK
+  global Button_Start
+  global Device_Selection
+  global Recognizer_Selection
+  global Translator_Selection
+  global Source_Selection
+  global Target_Selection
+  global Target2_Selection
 
-    global romajiMode
+  global Romaji_Mode
 
-    tk = Tk()
-    tk.iconbitmap(resource_path("resources/logo.ico"))
-    tk.title("OSC-SRTC")
-    tk.geometry("220x260")
-    # tk.resizable(0, 0)
+  TK = Tk()
+  TK.iconbitmap(resource_path("resources/logo.ico"))
+  TK.title("OSC-SRTC")
+  TK.geometry("220x300")
+  # tk.resizable(0, 0)
 
-    mic_label = Label(tk, text="Microphone")
-    combobox = ttk.Combobox(tk, height=5, width=210, values=sr.Microphone.list_microphone_names(), state="readonly")
+  mic_label = Label(TK, text="Microphone")
+  Device_Selection = ttk.Combobox(TK, height=5, width=210, values=Recognizer.getDevices(), state="readonly")
 
-    speech_label = Label(tk, text="Speech Recognition")
-    speechBox = ttk.Combobox(tk, height=5, width=210, values=speech_recognize_list, state="readonly")
+  speech_label = Label(TK, text="Speech Recognition")
+  Recognizer_Selection = ttk.Combobox(TK, height=5, width=210, values=Recognizer.getRegisteredRecognizers(), state="readonly")
 
-    source_label = Label(tk, text="Source")
-    sourceBox = ttk.Combobox(tk, height=5, values=lang_list, state="readonly")
+  source_label = Label(TK, text="Source")
+  Source_Selection = ttk.Combobox(TK, height=5, values=Supported_Languages, state="readonly")
 
-    target_label = Label(tk, text="Target")
-    targetBox = ttk.Combobox(tk, height=5, values=lang_list, state="readonly")
+  target_label = Label(TK, text="Target")
+  Target_Selection = ttk.Combobox(TK, height=5, values=Supported_Languages, state="readonly")
 
-    sourceBox.bind("<<ComboboxSelected>>", check_box_changed)
-    targetBox.bind("<<ComboboxSelected>>", check_box_changed)
+  target2_label = Label(TK, text="Target2 -> ()")
+  Target2_Selection = ttk.Combobox(TK, height=5, values=["none"]+Supported_Languages, state="readonly")
 
-    translator_label = Label(tk, text="Translator")
-    translatorBox = ttk.Combobox(tk, height=5, width=210, values=translator_list, state="readonly")
+  translator_label = Label(TK, text="Translator")
+  Translator_Selection = ttk.Combobox(TK, height=5, width=210, values=Translator.getRegisteredTranslators(), state="readonly")
+  
+  Romaji_Mode = IntVar()
+  romajiModeCheck = Checkbutton(TK, text="Romaji Mode (Ja)", variable=Romaji_Mode)
 
-    translatorBox.bind("<<ComboboxSelected>>", check_box_changed)
+  Button_Start = Button(TK, text="Start", command=lambda: start_main_thread())
 
-    combobox.current(0)
-    sourceBox.current(0)
-    targetBox.current(0)
-    speechBox.current(0)
-    translatorBox.current(0)
+  Recognizer_Selection.bind("<<ComboboxSelected>>", option_changed)
+  Source_Selection.bind("<<ComboboxSelected>>", option_changed)
+  Target_Selection.bind("<<ComboboxSelected>>", option_changed)
+  Target2_Selection.bind("<<ComboboxSelected>>", option_changed)
+  Translator_Selection.bind("<<ComboboxSelected>>", option_changed)
 
-    romajiMode = IntVar()
-    romajiModeCheck = Checkbutton(tk, text="Romaji Mode (Ja)", variable=romajiMode)
-    romajiModeCheck.config(state=DISABLED)
-
-    speech_label.pack()
-    speechBox.pack()
-
-    translator_label.pack()
-    translatorBox.pack()
-
-    mic_label.pack()
-    combobox.pack()
-
-    source_label.pack()
-    sourceBox.pack()
-
-    target_label.pack()
-    targetBox.pack()
-
-    romajiModeCheck.pack()
-
-    button_stat = Button(tk, text="Start", command=lambda: start())
-    button_stat.pack()
-
-    tk.protocol("WM_DELETE_WINDOW", on_closing)
-    tk.mainloop()
+  Device_Selection.current(0)
+  Recognizer_Selection.current(0)
+  Source_Selection.current(0)
+  Target_Selection.current(0)
+  Target2_Selection.current(0)
+  Translator_Selection.current(0)
 
 
-'''
-splash = Tk()
-width = 400
-height = 400
-screen_width = splash.winfo_screenwidth()
-screen_height = splash.winfo_screenheight()
-x = (screen_width/2) - (width/2)
-y = (screen_height/2) - (height/2)
+  speech_label.pack()
+  Recognizer_Selection.pack()
+
+  translator_label.pack()
+  Translator_Selection.pack()
+
+  mic_label.pack()
+  Device_Selection.pack()
+
+  source_label.pack()
+  Source_Selection.pack()
+
+  target_label.pack()
+  Target_Selection.pack()
+
+  target2_label.pack()
+  Target2_Selection.pack()
 
 
-splash.title('OSC-SRTC')
-splash.geometry("%dx%d+%d+%d" % (width, height, x, y))
-splash.configure(bg='gray')
-splash.overrideredirect(True)
+  romajiModeCheck.pack()
 
-splash_image_photo = PhotoImage(resource_path("resources/logo.jpg"))
-splash_image_label = Label(splash, image=splash_image_photo, width=400, height=400)
-splash_image_label.pack()
+  Button_Start.pack()
 
-splash.after(2000, lambda: main_window())
-splash.after(2000, lambda: splash.destroy())
-splash.mainloop()
-'''
+  TK.protocol("WM_DELETE_WINDOW", on_closing)
+  TK.mainloop()
 
 
-def set_target_lang(*data):
-    (link, lang_id) = data
-
-    global targetBox
-    if targetBox.current() != int(lang_id):
-        targetBox.current(int(lang_id))
-        check_box_changed()
-
-
-def set_source_lang(*data):
-    (link, lang_id) = data
-
-    global sourceBox
-    if sourceBox.current() != int(lang_id):
-        sourceBox.current(int(lang_id))
-        check_box_changed()
-
-
-def set_on_off(*data):
-    (link, on_off) = data
-
-    global now
-    if on_off:
-        if not is_enable:
-            start()
-    else:
-        if is_enable:
-            stop()
-
-
-def set_ptt_mode(*data):
-    (link, mode) = data
-
-    global ptt_mode
-    ptt_mode = mode
-
-
-def set_ptt(*data):
-    (link, ptt) = data
-
-    global ptt_end
-    if ptt:
-        print("[INFO] PTT Start")
-        ptt_end.clear()
-    else:
-        print("[INFO] PTT End")
-        ptt_end.set()
-
-
-check_update()
-check_api_settings()
-
-disp = dispatcher.Dispatcher()
-disp.map("/avatar/parameters/SRTC/TLang", set_target_lang)
-disp.map("/avatar/parameters/SRTC/SLang", set_source_lang)
-disp.map("/avatar/parameters/SRTC/OnOff", set_on_off)
-
-disp.map("/avatar/parameters/SRTC/PTTMode", set_ptt_mode)
-disp.map("/avatar/parameters/SRTC/PTT", set_ptt)
-
-server = osc_server.ThreadingOSCUDPServer((osc_serv_ip, osc_serv_port), disp)
-threading.Thread(target=server.serve_forever).start()
-
-client = udp_client.SimpleUDPClient(osc_ip, osc_port)
-main_window()
+if __name__ == "__main__":
+  initialize()
+  main_window()

@@ -1,7 +1,6 @@
 import threading
 import time
-import tkinter.ttk as ttk
-from tkinter import *
+from customtkinter import *
 from pythonosc import udp_client, osc_server, dispatcher
 from pykakasi import kakasi
 
@@ -9,6 +8,7 @@ from modules.SRTC_Utils import *
 from modules.SRTC_Recognizer import SRecognizer
 from modules.SRTC_Translator import STranslator
 
+import customtkinter
 
 Supported_Languages: list[str] = ["English", "Korean", "Japanese", "Chinese (simplified)", "Chinese (traditional)",
                        "French", "Spanish", "Italian", "Russian", "Ukrainian", "German", "Arabic", "Thai",
@@ -20,14 +20,14 @@ OSC_Send_Port = 9000
 OSC_Recv_IP = "127.0.0.1"
 OSC_Recv_Port = 9001
 
-TK: Tk = None
-Button_Start: Button = None
-Device_Selection: ttk.Combobox = None
-Recognizer_Selection: ttk.Combobox = None
-Translator_Selection: ttk.Combobox = None
-Source_Selection: ttk.Combobox = None
-Target_Selection: ttk.Combobox = None
-Target2_Selection: ttk.Combobox = None
+TK: CTk = None
+Button_Start: CTkButton = None
+Device_Selection: CTkOptionMenu = None
+Recognizer_Selection: CTkOptionMenu = None
+Translator_Selection: CTkOptionMenu = None
+Source_Selection: CTkOptionMenu = None
+Target_Selection: CTkOptionMenu = None
+Target2_Selection: CTkOptionMenu = None
 
 Romaji_Mode: IntVar = None
 
@@ -49,8 +49,8 @@ def OSC_SetTarget(*data):
     (link, lang_id) = data
 
     global Target_Selection
-    if Target_Selection.current() != int(lang_id):
-        Target_Selection.current(int(lang_id))
+    if Target_Selection.get() != Supported_Languages[lang_id]:
+        Target_Selection.set(Supported_Languages[lang_id])
         option_changed()
 
 
@@ -58,8 +58,8 @@ def OSC_SetSource(*data):
     (link, lang_id) = data
 
     global Source_Selection
-    if Source_Selection.current() != int(lang_id):
-        Source_Selection.current(int(lang_id))
+    if Source_Selection.get() != Supported_Languages[lang_id]:
+        Source_Selection.set(Supported_Languages[lang_id])
         option_changed()
 
 
@@ -128,28 +128,28 @@ def initialize():
   OSC_Client = udp_client.SimpleUDPClient(OSC_Send_IP, OSC_Send_Port)
 
 def option_changed(*args):
-  OSC_Client.send_message("/avatar/parameters/SRTC/SLang", Source_Selection.current())
-  OSC_Client.send_message("/avatar/parameters/SRTC/TLang", Target_Selection.current())
+  OSC_Client.send_message("/avatar/parameters/SRTC/SLang", Supported_Languages.index(Source_Selection.get()))
+  OSC_Client.send_message("/avatar/parameters/SRTC/TLang", Supported_Languages.index(Target_Selection.get()))
   
-  source_lang = Supported_Languages[Source_Selection.current()]
-  target_lang = Supported_Languages[Target_Selection.current()]
-  target2_lang = Supported_Languages[Target2_Selection.current()-1] if Target2_Selection.current() != 0 else "None"
+  source_lang = Source_Selection.get()
+  target_lang = Target_Selection.get()
+  target2_lang = Target2_Selection.get()
 
-  if not Recognizer.isLanguageSupported(Recognizer_Selection.current(), source_lang):
+  if not Recognizer.isLanguageSupported(Recognizer_Selection.get(), source_lang):
     print("[Error] This recognizer does not support " + source_lang + " language.")
-    Recognizer_Selection.current(0)
+    Recognizer_Selection.set(Recognizer.getRegisteredRecognizers()[0])
 
-  if not Translator.isLanguageSupported(Translator_Selection.current(), source_lang):
+  if not Translator.isLanguageSupported(Translator_Selection.get(), source_lang):
     print("[Error] This translator does not support " + source_lang + " language.")
-    Translator_Selection.current(0)
+    Translator_Selection.set(Translator.getRegisteredTranslators()[0])
   
-  if not Translator.isLanguageSupported(Translator_Selection.current(), target_lang):
+  if not Translator.isLanguageSupported(Translator_Selection.get(), target_lang):
     print("[Error] This translator does not support " + target_lang + " language.")
-    Translator_Selection.current(0)
+    Translator_Selection.set(Translator.getRegisteredTranslators()[0])
 
-  if target2_lang != "None" and not Translator.isLanguageSupported(Translator_Selection.current(), target2_lang):
+  if target2_lang != "None" and not Translator.isLanguageSupported(Translator_Selection.get(), target2_lang):
     print("[Error] This translator does not support " + target2_lang + " language.")
-    Translator_Selection.current(0)
+    Translator_Selection.set(Translator.getRegisteredTranslators()[0])
   
   if is_running:
     stop_main_thread()
@@ -163,35 +163,35 @@ def main_thread():
 
   while not Stop_Event.is_set():
     try:
-      recognized = Recognizer.ListenAndRecognize(Recognizer_Selection.current(), Supported_Languages[Source_Selection.current()],
-                                                Stop_Event, Device_Selection.current(), is_ptt, PTT_End)
+      recognized = Recognizer.ListenAndRecognize(Recognizer_Selection.get(), Source_Selection.get(),
+                                                Stop_Event, Recognizer.getDevices().index(Device_Selection.get()), is_ptt, PTT_End)
       to_send_message = ""
 
       if recognized != "":
         print("[Info] Recognized: " + recognized)
         
-        if Source_Selection.current() != Target_Selection.current():
+        if Source_Selection.get() != Target_Selection.get():
           print("[Info] Translating to Target 1...")
-          translated = Translator.Translate(Translator_Selection.current(), recognized, Supported_Languages[Source_Selection.current()],
-                                            Supported_Languages[Target_Selection.current()])
+          translated = Translator.Translate(Translator_Selection.get(), recognized, Source_Selection.get(),
+                                            Target_Selection.get())
         else:
           translated = recognized
 
-        if Supported_Languages[Target_Selection.current()] == "Japanese" and Romaji_Mode.get() == 1:
+        if Target_Selection.get() == "Japanese" and Romaji_Mode.get() == 1:
           translated = Translator.RomajiConvert(translated)
         print("[Info] Translated to Target 1: " + translated)
         to_send_message += translated
 
-        if Target2_Selection.current() != 0:
-          if Source_Selection.current() != Target2_Selection.current()-1:
+        if Target2_Selection.get() != "None":
+          if Source_Selection.get() != Target2_Selection.get():
 
             print("[Info] Translating to Target 2...")
-            translated = Translator.Translate(Translator_Selection.current(), recognized, Supported_Languages[Source_Selection.current()],
-                                              Supported_Languages[Target2_Selection.current()-1])  
+            translated = Translator.Translate(Translator_Selection.get(), recognized, Source_Selection.get(),
+                                              Target2_Selection.get())  
           else:
             translated = recognized
 
-          if Supported_Languages[Target2_Selection.current()-1] == "Japanese" and Romaji_Mode.get() == 1:
+          if Target2_Selection.get() == "Japanese" and Romaji_Mode.get() == 1:
             translated = Translator.RomajiConvert(translated)
           print("[Info] Translated to Target 2: " + translated)
           to_send_message += " (" + translated + ")"
@@ -209,7 +209,7 @@ def start_main_thread():
   global is_running
 
   is_running = True
-  Button_Start.config(text="Stop", command=lambda: stop_main_thread())
+  Button_Start.configure(text="Stop", command=lambda: stop_main_thread())
   Stop_Event.clear()
   OSC_Client.send_message("/avatar/parameters/SRTC/OnOff", True)
 
@@ -228,7 +228,7 @@ def stop_main_thread():
   global is_running
 
   is_running = False
-  Button_Start.config(text="Start", command=lambda: start_main_thread())
+  Button_Start.configure(text="Start", command=lambda: start_main_thread())
 
   Stop_Event.set()
   OSC_Client.send_message("/avatar/parameters/SRTC/OnOff", False)
@@ -252,47 +252,42 @@ def main_window():
 
   global Romaji_Mode
 
-  TK = Tk()
+  TK = CTk()
   TK.iconbitmap(resource_path("resources/logo.ico"))
   TK.title("OSC-SRTC")
-  TK.geometry("220x300")
+  TK.geometry("220x400")
   # tk.resizable(0, 0)
 
-  mic_label = Label(TK, text="Microphone")
-  Device_Selection = ttk.Combobox(TK, height=5, width=210, values=Recognizer.getDevices(), state="readonly")
+  mic_label = CTkLabel(TK, text="Microphone")
+  Device_Selection = CTkOptionMenu(TK, values=Recognizer.getUsableDevices(), command=option_changed)
 
-  speech_label = Label(TK, text="Speech Recognition")
-  Recognizer_Selection = ttk.Combobox(TK, height=5, width=210, values=Recognizer.getRegisteredRecognizers(), state="readonly")
+  speech_label = CTkLabel(TK, text="Speech Recognition")
+  Recognizer_Selection = CTkOptionMenu(TK, width=200, values=Recognizer.getRegisteredRecognizers(), command=option_changed)
 
-  source_label = Label(TK, text="Source")
-  Source_Selection = ttk.Combobox(TK, height=5, values=Supported_Languages, state="readonly")
+  source_label = CTkLabel(TK, text="Source")
+  Source_Selection = CTkOptionMenu(TK, width=100, values=Supported_Languages, command=option_changed)
 
-  target_label = Label(TK, text="Target")
-  Target_Selection = ttk.Combobox(TK, height=5, values=Supported_Languages, state="readonly")
+  target_label = CTkLabel(TK, text="Target")
+  Target_Selection = CTkOptionMenu(TK, width=100, values=Supported_Languages, command=option_changed)
 
-  target2_label = Label(TK, text="Target2 -> ()")
-  Target2_Selection = ttk.Combobox(TK, height=5, values=["none"]+Supported_Languages, state="readonly")
+  target2_label = CTkLabel(TK, text="Target2 -> ()")
+  Target2_Selection = CTkOptionMenu(TK, width=100, values=["None"]+Supported_Languages, command=option_changed)
 
-  translator_label = Label(TK, text="Translator")
-  Translator_Selection = ttk.Combobox(TK, height=5, width=210, values=Translator.getRegisteredTranslators(), state="readonly")
+  translator_label = CTkLabel(TK, text="Translator")
+  Translator_Selection = CTkOptionMenu(TK, width=200, values=Translator.getRegisteredTranslators(), command=option_changed)
   
   Romaji_Mode = IntVar()
-  romajiModeCheck = Checkbutton(TK, text="Romaji Mode (Ja)", variable=Romaji_Mode)
+  romajiModeCheck = CTkCheckBox(TK, text="Romaji Mode (Ja)", variable=Romaji_Mode)
 
-  Button_Start = Button(TK, text="Start", command=lambda: start_main_thread())
+  Button_Start = CTkButton(TK, text="Start", command=lambda: start_main_thread())
 
-  Recognizer_Selection.bind("<<ComboboxSelected>>", option_changed)
-  Source_Selection.bind("<<ComboboxSelected>>", option_changed)
-  Target_Selection.bind("<<ComboboxSelected>>", option_changed)
-  Target2_Selection.bind("<<ComboboxSelected>>", option_changed)
-  Translator_Selection.bind("<<ComboboxSelected>>", option_changed)
 
-  Device_Selection.current(0)
-  Recognizer_Selection.current(0)
-  Source_Selection.current(0)
-  Target_Selection.current(0)
-  Target2_Selection.current(0)
-  Translator_Selection.current(0)
+  Device_Selection.set(Recognizer.getDevices()[0])
+  Recognizer_Selection.set(Recognizer.getRegisteredRecognizers()[0])
+  Source_Selection.set(Supported_Languages[0])
+  Target_Selection.set(Supported_Languages[0])
+  Target2_Selection.set("None")
+  Translator_Selection.set(Translator.getRegisteredTranslators()[0])
 
 
   speech_label.pack()

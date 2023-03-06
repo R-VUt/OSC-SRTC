@@ -56,11 +56,10 @@ class STranslator:
         """
         return self.__Registered_Translators
 
-    def isLanguageSupported(self, translator_index: int, language: str) -> bool:
+    def isLanguageSupported(self, translator: str, language: str) -> bool:
         """
         Check if the language is supported by the translator.
         """
-        translator = self.__Registered_Translators[translator_index]
         if translator == "Google Translate":
             return language in Google_Supported_Languages
         elif translator == "DeepL":
@@ -78,17 +77,16 @@ class STranslator:
           tmp += i['hepburn'] + " "
         return tmp
 
-    def Translate(self, translator_index: int, text: str, source_language: str, target_language: str) -> str | int:
+    def Translate(self, translator: str, text: str, source_language: str, target_language: str) -> str | int:
         """
         Translate the text using the translator.
         """
-        translator = self.__Registered_Translators[translator_index]
         if translator == "Google Translate":
             tr = Translator()
             return tr.translate(text, src=Google_Supported_Languages[source_language], dest=Google_Supported_Languages[target_language]).text
         
         elif translator == "DeepL":
-            return deepl.translate(text, target_lang=DeepL_Supported_Languages[target_language], source_lang=DeepL_Supported_Languages[source_language])
+            return deepl.translate(target_language=DeepL_Supported_Languages[target_language], source_language=DeepL_Supported_Languages[source_language], text=text)
         
         elif translator == "Papago":
             return self.__papago_translate(Papago_Supported_Languages[source_language], Papago_Supported_Languages[target_language], text)

@@ -57,12 +57,16 @@ class SRecognizer:
         """
         return sr.Microphone.list_microphone_names()
     
+    def getUsableDevices(self) -> list[str]:
+        """
+        Get a list of working devices.
+        """
+        return sr.Microphone.list_usable_microphones()
 
-    def isLanguageSupported(self, recognizer_index: int, language: str) -> bool:
+    def isLanguageSupported(self, recognizer: str, language: str) -> bool:
         """
         Check if the language is supported by the recognizer.
         """
-        recognizer = self.__Registered_Recognizers[recognizer_index]
         if recognizer == "Google WebSpeech":
             return language in Google_Supported_Languages
         elif recognizer == "Azure Speech":
@@ -73,21 +77,20 @@ class SRecognizer:
             return False
         
         
-    def Recognize(self, recognizer_index: int, language: str, audio: sr.AudioData) -> str:
+    def Recognize(self, recognizer: str, language: str, audio: sr.AudioData) -> str:
         """
         Recognize the audio data.
         """
-        recognizer = self.__Registered_Recognizers[recognizer_index]
         if recognizer == "Google WebSpeech":
             return self.__speech_recognition.recognize_google(audio, language=Google_Supported_Languages[language])
         elif recognizer == "Azure Speech":
             return self.__speech_recognition.recognize_azure(audio, key=self.__azure_key, language=Azure_Supported_Languages[language], region=self.__azure_location)
         elif recognizer == "ETRI Speech":
-            return self.__speech_recognition.recognize_etri(audio, key=self.__etri_key, language=ETRI_Supported_Languages[language])
+            return self.__speech_recognition.recognize_etri(audio, self.__etri_key, ETRI_Supported_Languages[language])
         else:
             return ""
     
-    def ListenAndRecognize(self, recognizer_index: int, language: str, stop_event: threading.Event(), selected_device: int = 0, is_ptt: bool = False, ptt_event: threading.Event() = None) -> str:
+    def ListenAndRecognize(self, recognizer: str, language: str, stop_event: threading.Event(), selected_device: int = 0, is_ptt: bool = False, ptt_event: threading.Event() = None) -> str:
         """
         Listen and recognize the audio data.
 
@@ -120,7 +123,7 @@ class SRecognizer:
               
               print("[SRecognizer][Info] Recognizing...")
               try:
-                  return self.Recognize(recognizer_index, language, audio)
+                  return self.Recognize(recognizer, language, audio)
               except sr.UnknownValueError:
                   print("[SRecognizer][Error] Unknown Value")
                   return ""

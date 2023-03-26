@@ -28,7 +28,7 @@ jobs:
         uses: actions/upload-artifact@v1
         with:
           name: SRTC-windows
-          path: dist/SRTC.exe
+          path: dist/OSC-SRTC.exe
 
   release:
     needs: [windows-build]
@@ -56,7 +56,7 @@ jobs:
 
       - name: Zip
         run: |
-          zip --junk-paths SRTC-windows ./SRTC-windows/SRTC.exe api_settings.json
+          zip --junk-paths SRTC-windows ./SRTC-windows/OSC-SRTC.exe ./SRTC-windows/api_settings.json
 
       - name: Append Binary
         uses: actions/upload-release-asset@v1

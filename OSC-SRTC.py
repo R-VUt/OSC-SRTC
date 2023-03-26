@@ -1,14 +1,12 @@
 import threading
 import time
 from customtkinter import *
-from pythonosc import udp_client, osc_server, dispatcher
-from pykakasi import kakasi
+from pythonosc import udp_client, osc_server
 
 from modules.SRTC_Utils import *
 from modules.SRTC_Recognizer import SRecognizer
 from modules.SRTC_Translator import STranslator
 
-import customtkinter
 
 Supported_Languages: list[str] = ["English", "Korean", "Japanese", "Chinese (simplified)", "Chinese (traditional)",
                        "French", "Spanish", "Italian", "Russian", "Ukrainian", "German", "Arabic", "Thai",

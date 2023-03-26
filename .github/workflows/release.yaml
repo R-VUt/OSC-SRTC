@@ -44,6 +44,9 @@ jobs:
       - name: Upgrade pip
         run: pyinstaller --onefile --exclude torch --exclude numpy --exclude tensorflow --exclude PIL --exclude pandas --exclude jinja2 --add-data "resources;resources" --add-data "./install-python/Lib/site-packages/pykakasi/data;pykakasi\\data" --add-data "modules;modules" --add-data "./install-python/Lib/site-packages/customtkinter;customtkinter" OSC-SRTC.py
 
+      - name: Install Requirements
+        run: pip install -r requirements.txt
+
       - name: build
         run: pyinstaller -F SRTC.py
 

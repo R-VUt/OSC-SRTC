@@ -35,9 +35,6 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:    
-      - name: Checkout commit
-        uses: actions/checkout@master
-
       - name: Download Windows
         uses: actions/download-artifact@v1
         with:
@@ -56,7 +53,7 @@ jobs:
 
       - name: Zip
         run: |
-          zip --junk-paths SRTC-windows ./SRTC-windows/OSC-SRTC.exe ./SRTC-windows/api_settings.json
+          zip --junk-paths SRTC-windows ./SRTC-windows/OSC-SRTC.exe 
 
       - name: Append Binary
         uses: actions/upload-release-asset@v1

@@ -20,18 +20,17 @@ Papago_Supported_Languages: dict[str, str] = {"English" : "en", "Korean" : "ko",
                                             "Russian" : "ru", "German" : "de"}
 
 class STranslator:
-    
-    def __init__(self, settings: dict):
+    def __init__(self, settings: dict, log):
         self.__Registered_Translators: list[str] = ["Google Translate", "DeepL"] # now supports Google, DeepL, Papago
-
-        print("[Translator][Info] Initializing Translator...")
+        self.__print_log = log
+        self.__print_log("[Translator][Info] Initializing Translator...")
 
         # Translator Key Settings
         if settings.get("papago_id") and settings.get("papago_secret"):
             self.__Registered_Translators.append("Papago")
             self.__papago_id = settings.get("papago_id")
             self.__papago_secret = settings.get("papago_secret")
-            print("[Recognizer][Info] Azure Speech Cognitive API is enabled.")
+            self.__print_log("[Recognizer][Info] Azure Speech Cognitive API is enabled.")
         # ----------------------------------------------
 
     def __papago_translate(self, source, target, text):

@@ -24,23 +24,22 @@ ETRI_Supported_Languages: dict[str, str]   = {"English" : "english", "Korean" : 
 # ----------------------------------------------
 
 class SRecognizer:
-    
-    def __init__(self, settings: dict):
+    def __init__(self, settings: dict, log):
         self.__Registered_Recognizers: list[str] = ["Google WebSpeech"] # now supports Google, Azure, ETRI
-
-        print("[SRecognizer][Info] Initializing Speech Recognition...")
+        self.__print_log = log;
+        self.__print_log("[SRecognizer][Info] Initializing Speech Recognition...")
 
         # Recognizer Key Settings
         if settings.get("azure_key") and settings.get("azure_location"):
             self.__Registered_Recognizers.append("Azure Speech")
             self.__azure_key = settings.get("azure_key")
             self.__azure_location = settings.get("azure_location")
-            print("[SRecognizer][Info] Azure Speech Cognitive API is enabled.")
+            self.__print_log("[SRecognizer][Info] Azure Speech Cognitive API is enabled.")
 
         if settings.get("etri_key"):
             self.__Registered_Recognizers.append("ETRI Speech")
             self.__etri_key = settings.get("etri_key")
-            print("[SRecognizer][Info] ETRI API is enabled.")
+            self._print_log("[SRecognizer][Info] ETRI API is enabled.")
         # ----------------------------------------------
 
         self.__speech_recognition = sr.Recognizer()
@@ -107,7 +106,7 @@ class SRecognizer:
                       time.sleep(0.1)
 
               playsound(resource_path("resources\\1.wav").replace("\\", "/"), block=False)
-              print("[SRecognizer][Info] Listening...")
+              self.__print_log("[SRecognizer][Info] Listening...")
 
               try:
                   if is_ptt:
@@ -115,19 +114,19 @@ class SRecognizer:
                   else:
                       audio = r.listen(source, timeout=20, phrase_time_limit=20, stopper=stop_event)
               except sr.WaitTimeoutError:
-                  print("[SRecognizer][Error] Timeout")
+                  self.__print_log("[SRecognizer][Error] Timeout")
                   continue
               except sr.StopperSet:
-                  print("[SRecognizer][Info] Successfully stopped listening")
+                  self.__print_log("[SRecognizer][Info] Successfully stopped listening")
                   return ""
               
-              print("[SRecognizer][Info] Recognizing...")
+              self.__print_log("[SRecognizer][Info] Recognizing...")
               try:
                   return self.Recognize(recognizer, language, audio)
               except sr.UnknownValueError:
-                  print("[SRecognizer][Error] Unknown Value")
+                  self.__print_log("[SRecognizer][Error] Unknown Value")
                   return ""
               except sr.RequestError as e:
-                  print("[SRecognizer][Error] Request Error")
+                  self.__print_log("[SRecognizer][Error] Request Error")
                   return ""
               

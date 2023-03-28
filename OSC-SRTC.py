@@ -21,7 +21,8 @@ OSC_Recv_Port = 9001
 log_temp = ""
 log_temp_printed = False
 
-version = "V4C"
+version = "V4D"
+version_RCUPD = 11
 
 TK: CTk = None
 Button_Start: CTkButton = None
@@ -272,7 +273,7 @@ def main_window():
   navigation_frame.grid(row=0, column=0, sticky="nsew")
 
   navigation_frame_label = CTkLabel(navigation_frame, text="  OSC-SRTC " + version, image=logo_image,
-                                                             compound="left", font=CTkFont(size=15, weight="bold"))
+                                                             compound="left", font=CTkFont(size=17, weight="bold"))
 
   mic_label = CTkLabel(navigation_frame, text="Microphone")
   Device_Selection = CTkOptionMenu(navigation_frame, values=Recognizer.getUsableDevices(), command=option_changed)
@@ -340,6 +341,8 @@ def main_window():
 
   TK.protocol("WM_DELETE_WINDOW", on_closing)
   print_log("[Info] UI Initialized.")
+  
+  update_check(version_RCUPD)
   TK.mainloop()
 
 def print_log(text):
@@ -360,7 +363,7 @@ def print_log(text):
     log_textbox.configure(state="disabled")
 def clear_log():
   log_textbox.configure(state="normal")
-  log_textbox.delete("2.0", "end")
+  log_textbox.delete("1.0", "end")
   log_textbox.configure(state="disabled")
 
 if __name__ == "__main__":

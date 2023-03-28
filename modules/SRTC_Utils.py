@@ -45,3 +45,32 @@ def load_settings() -> dict:
 
 def clear_screen():
     os.system("cls" if os.name == "nt" else "clear")
+
+def update_check(ver: int) -> None:
+    import requests
+    from bs4 import BeautifulSoup
+    from CTkMessagebox import CTkMessagebox
+    try:
+        url = "https://rera-c.booth.pm/items/4217922"
+        res = requests.get(url)
+        soup = BeautifulSoup(res.text, "html.parser")
+        sections = soup.find_all("section")
+        chk = False
+        for section in sections:
+            try:
+                title = section.find("h2")
+                if title.text == "RCUPDCHK":
+                    version = section.find("p").text
+                    print("[Log-Stelth] 업데이트 확인 성공: " + version)
+                    if int(version) > ver:
+                        msg = CTkMessagebox(title="OSC-SRTC", message="New update found! \nDo you want to check the booth page?", option_1="No", option_2="Yes", icon="question")
+                        response = msg.get()
+                        if response == "Yes":
+                            os.startfile(url)
+                    chk = True
+            except Exception:
+                pass
+        if not chk:
+            print("[Log-Stelth] 업데이트 확인 실패")
+    finally:
+        print("[Log-Stelth] 업데이트 확인 프로세스 종료")

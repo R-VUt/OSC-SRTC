@@ -1,3 +1,9 @@
+<p align="center">
+  <img src="https://github.com/rera-vrc/OSC-SRTC/blob/main/imgs/Dark-Logo.png?raw=true#gh-dark-mode-only" width="400">
+  <img src="https://github.com/rera-vrc/OSC-SRTC/blob/main/imgs/Light-Logo.png?raw=true#gh-light-mode-only" width="400">
+  </br>
+  </br>
+</p>
 
 # OSC-SRTC [![build](https://github.com/rera-vrc/OSC-SRTC/actions/workflows/release.yaml/badge.svg)](https://github.com/rera-vrc/OSC-SRTC/actions/workflows/release.yaml)
 

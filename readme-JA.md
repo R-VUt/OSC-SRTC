@@ -1,13 +1,11 @@
 <p align="center">
-  <img src="https://github.com/rera-vrc/OSC-SRTC/blob/main/imgs/Dark-Logo.png?raw=true#gh-dark-mode-only" width="400">
-  <img src="https://github.com/rera-vrc/OSC-SRTC/blob/main/imgs/Light-Logo.png?raw=true#gh-light-mode-only" width="400">
+  <img src="https://github.com/rera-vrc/OSC-SRTC/blob/main/imgs/Dark-Logo.png?raw=true#gh-dark-mode-only" height="200">
+  <img src="https://github.com/rera-vrc/OSC-SRTC/blob/main/imgs/Light-Logo.png?raw=true#gh-light-mode-only" height="200">
   </br>
-  </br>
+
 </p>
 
 # OSC-SRTC [![build](https://github.com/rera-vrc/OSC-SRTC/actions/workflows/release.yaml/badge.svg)](https://github.com/rera-vrc/OSC-SRTC/actions/workflows/release.yaml)
-
-[한국어](https://github.com/rera-vrc/OSC-SRTC/blob/main/readme-KO.md) | [English](https://github.com/rera-vrc/OSC-SRTC/blob/main/readme.md)
 
 OSC-SRTCプロジェクトは、VRChatのOSC Chatbox APIと音声認識および翻訳APIを組み合わせたオープンソースプロジェクトです。このプロジェクトは、主にSTT（音声認識）機能を使用することを目的として設計されていますが、翻訳機能にも実験的に対応しています。Papago、Azureなどのサービスを使用する場合は、APIキーが必要です。
 

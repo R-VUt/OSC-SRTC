@@ -9,3 +9,4 @@ pykakasi~=2.2.1
 customtkinter~=5.1.2
 PyAudio~=0.2.13
 Pillow~=9.4.0
+CTkMessagebox~=1.5

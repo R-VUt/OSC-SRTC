@@ -21,7 +21,7 @@ OSC_Recv_Port = 9001
 log_temp = ""
 log_temp_printed = False
 
-version = "V4D"
+version = "V4D_t"
 version_RCUPD = 11
 
 TK: CTk = None

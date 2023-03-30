@@ -8,7 +8,7 @@
   [<a href="https://github.com/rera-vrc/OSC-SRTC/blob/main/readme-JA.md">日本語</a>]
 </p>
 
-# OSC-SRTC [![build](https://github.com/rera-vrc/OSC-SRTC/actions/workflows/release.yaml/badge.svg)](https://github.com/rera-vrc/OSC-SRTC/actions/workflows/release.yaml)
+# OSC-SRTC [![version](https://img.shields.io/github/v/tag/rera-vrc/OSC-SRTC?color=informational&label=version&sort=semver)](https://github.com/rera-vrc/OSC-SRTC/releases/) [![build](https://github.com/rera-vrc/OSC-SRTC/actions/workflows/release.yaml/badge.svg)](https://github.com/rera-vrc/OSC-SRTC/actions/workflows/release.yaml) [![downloads](https://shields.io/github/downloads/rera-vrc/OSC-SRTC/total)](https://github.com/rera-vrc/OSC-SRTC/releases/) [![store](https://img.shields.io/badge/Store-BOOTH.PM-red)](https://rera-c.booth.pm/items/4217922)
 
 The OSC-SRTC project is an open source project that combines VRChat's OSC Chatbox API with speech recognition and translation APIs. This project is designed to primarily use STT (Speech To Text) functionality, but also has experimental support for translation functionality. API keys are required for services such as Papago and Azure.
 

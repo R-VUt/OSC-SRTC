@@ -1,11 +1,12 @@
 import threading
 import time
 from customtkinter import *
-from pythonosc import udp_client, osc_server
+from pythonosc import udp_client, osc_server, dispatcher
 
 from modules.SRTC_Utils import *
 from modules.SRTC_Recognizer import SRecognizer
 from modules.SRTC_Translator import STranslator
+from modules.SRTC_Extention import Extention_MainServer
 from PIL import Image
 
 Supported_Languages: list[str] = ["English", "Korean", "Japanese", "Chinese (simplified)", "Chinese (traditional)",
@@ -17,11 +18,12 @@ OSC_Send_IP = "127.0.0.1"
 OSC_Send_Port = 9000
 OSC_Recv_IP = "127.0.0.1"
 OSC_Recv_Port = 9001
+Extention_Port = 9002
 
 log_temp = ""
 log_temp_printed = False
 
-version = "V4D5"
+version = "V4DT"
 version_RCUPD = 12
 
 TK: CTk = None
@@ -41,6 +43,7 @@ Translator: STranslator = None
 
 OSC_Client: udp_client.SimpleUDPClient = None
 OSC_Server: osc_server.ThreadingOSCUDPServer = None
+Extention_System: Extention_MainServer = None
 
 is_running: bool = False
 is_ptt: bool = False
@@ -107,11 +110,13 @@ def initialize():
 
   global OSC_Client
   global OSC_Server
+  global Extention_System
 
   global OSC_Send_IP
   global OSC_Send_Port
   global OSC_Recv_IP
   global OSC_Recv_Port
+  global Extention_Port
 
   print_log("Initializing...")
 
@@ -125,11 +130,28 @@ def initialize():
     OSC_Recv_IP = settings.get("osc_serv_ip")
   if settings.get("osc_serv_port"):
     OSC_Recv_Port = settings.get("osc_serv_port")
+  
+  if settings.get("extention_port"):
+    Extention_Port = settings.get("extention_port")
 
   Recognizer = SRecognizer(settings, print_log)
   Translator = STranslator(settings, print_log)
 
+  disp = dispatcher.Dispatcher()
+  disp.map("/avatar/parameters/SRTC/TLang", OSC_SetTarget)
+  disp.map("/avatar/parameters/SRTC/SLang", OSC_SetSource)
+  disp.map("/avatar/parameters/SRTC/OnOff", OSC_SetOnOff)
+
+  disp.map("/avatar/parameters/SRTC/PTTMode", OSC_SetPTT)
+  disp.map("/avatar/parameters/SRTC/PTT", OSC_PTTButton)
+
+  OSC_Server = osc_server.ThreadingOSCUDPServer((OSC_Recv_IP, OSC_Recv_Port), disp)
+  threading.Thread(target=OSC_Server.serve_forever).start()
+
   OSC_Client = udp_client.SimpleUDPClient(OSC_Send_IP, OSC_Send_Port)
+
+  Extention_System = Extention_MainServer(OSC_Recv_IP, Extention_Port, print_log)
+  Extention_System.start_server()
 
 def option_changed(*args):
   OSC_Client.send_message("/avatar/parameters/SRTC/SLang", Supported_Languages.index(Source_Selection.get()))
@@ -205,6 +227,7 @@ def main_thread():
         if to_send_message != "":
           print_log("[Info] Sending message: " + to_send_message)
           print_log(" ")
+          to_send_message = Extention_System.execute_extention(to_send_message)
           OSC_Client.send_message("/chatbox/input", [to_send_message, True])
     except:
       print_log("[Error] Could not recognize or translate.")

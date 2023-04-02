@@ -105,7 +105,7 @@ class SRecognizer:
                           return ""
                       time.sleep(0.1)
 
-              playsound(resource_path("resources\\1.wav").replace("\\", "/"), block=False)
+              playsound(resource_path("resources\\1.wav").replace("\\", "/"), block=True)
               self.__print_log("[SRecognizer][Info] Listening...")
 
               try:

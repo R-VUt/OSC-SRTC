@@ -9,6 +9,8 @@ from modules.SRTC_Translator import STranslator
 from modules.SRTC_Extention import Extention_MainServer
 from PIL import Image
 
+sys.stdout = sys.stderr = open(os.devnull, 'w') # noconsole fix
+
 Supported_Languages: list[str] = ["English", "Korean", "Japanese", "Chinese (simplified)", "Chinese (traditional)",
                        "French", "Spanish", "Italian", "Russian", "Ukrainian", "German", "Arabic", "Thai",
                        "Tagalog", "Bahasa Malaysia", "Bahasa Indonesia", "Hindi", "Hebrew", "Turkish",

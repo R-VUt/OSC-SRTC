@@ -228,7 +228,8 @@ def main_thread():
           print_log("[Info] Sending message: " + to_send_message)
           print_log(" ")
           to_send_message = Extention_System.execute_extention(to_send_message)
-          OSC_Client.send_message("/chatbox/input", [to_send_message, True])
+          if to_send_message != "{Sended-Already}":
+            OSC_Client.send_message("/chatbox/input", [to_send_message, True])
     except:
       print_log("[Error] Could not recognize or translate.")
 

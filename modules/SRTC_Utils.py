@@ -61,7 +61,7 @@ def update_check(ver: int) -> None:
                 title = section.find("h2")
                 if title.text == "RCUPDCHK":
                     version = section.find("p").text
-                    print("[Log-Stelth] 업데이트 확인 성공: " + version)
+                    print("[Log-Stelth] Update Check Success: " + version)
                     if int(version) > ver:
                         msg = CTkMessagebox(title="OSC-SRTC", message="New update found! \nDo you want to check the booth page?", option_1="No", option_2="Yes", icon="question")
                         response = msg.get()
@@ -71,6 +71,6 @@ def update_check(ver: int) -> None:
             except Exception:
                 pass
         if not chk:
-            print("[Log-Stelth] 업데이트 확인 실패")
+            print("[Log-Stelth] Update Check Failed")
     finally:
-        print("[Log-Stelth] 업데이트 확인 프로세스 종료")
+        print("[Log-Stelth] Update Check process finished")

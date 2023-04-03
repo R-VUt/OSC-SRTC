@@ -6,7 +6,7 @@ from pythonosc import udp_client, osc_server, dispatcher
 from modules.SRTC_Utils import *
 from modules.SRTC_Recognizer import SRecognizer
 from modules.SRTC_Translator import STranslator
-from modules.SRTC_Extention import Extention_MainServer
+from modules.SRTC_Extension import Extension_Main_Server
 from PIL import Image
 
 sys.stdout = sys.stderr = open(os.devnull, 'w') # noconsole fix
@@ -20,7 +20,7 @@ OSC_Send_IP = "127.0.0.1"
 OSC_Send_Port = 9000
 OSC_Recv_IP = "127.0.0.1"
 OSC_Recv_Port = 9001
-Extention_Port = 9002
+Extension_Port = 9002
 
 log_temp = ""
 log_temp_printed = False
@@ -45,7 +45,7 @@ Translator: STranslator = None
 
 OSC_Client: udp_client.SimpleUDPClient = None
 OSC_Server: osc_server.ThreadingOSCUDPServer = None
-Extention_System: Extention_MainServer = None
+Extension_System: Extension_Main_Server = None
 
 is_running: bool = False
 is_ptt: bool = False
@@ -112,13 +112,13 @@ def initialize():
 
   global OSC_Client
   global OSC_Server
-  global Extention_System
+  global Extension_System
 
   global OSC_Send_IP
   global OSC_Send_Port
   global OSC_Recv_IP
   global OSC_Recv_Port
-  global Extention_Port
+  global Extension_Port
 
   print_log("Initializing...")
 
@@ -133,8 +133,8 @@ def initialize():
   if settings.get("osc_serv_port"):
     OSC_Recv_Port = settings.get("osc_serv_port")
   
-  if settings.get("extention_port"):
-    Extention_Port = settings.get("extention_port")
+  if settings.get("extension_port"):
+    Extension_Port = settings.get("extension_port")
 
   Recognizer = SRecognizer(settings, print_log)
   Translator = STranslator(settings, print_log)
@@ -152,8 +152,8 @@ def initialize():
 
   OSC_Client = udp_client.SimpleUDPClient(OSC_Send_IP, OSC_Send_Port)
 
-  Extention_System = Extention_MainServer(OSC_Recv_IP, Extention_Port, print_log)
-  Extention_System.start_server()
+  Extension_System = Extension_Main_Server(OSC_Recv_IP, Extension_Port, print_log)
+  Extension_System.start_server()
 
 def option_changed(*args):
   OSC_Client.send_message("/avatar/parameters/SRTC/SLang", Supported_Languages.index(Source_Selection.get()))
@@ -227,8 +227,8 @@ def main_thread():
           
 
         if to_send_message != "":
-          print_log("[Info] Executing extention...")
-          to_send_message = Extention_System.execute_extention(to_send_message)
+          print_log("[Info] Executing extension...")
+          to_send_message = Extension_System.execute_extension(to_send_message)
           print_log("[Info] Sending message: " + to_send_message)
           print_log(" ")
           if to_send_message != "{Sended-Already}":

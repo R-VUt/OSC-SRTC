@@ -58,7 +58,7 @@ class Extention_MainServer:
     def __heartbeat_check(self):
         while True:
             self.__send_heartbeat()
-            time.sleep(5)
+            time.sleep(2)
 
     def __init__(self, server_ip: str, port: int, log: callable):
         self.__server_ip = server_ip
@@ -112,7 +112,6 @@ class Extention_MainServer:
                     return "Already first extention", 400
                 self.__extention_list[i], self.__extention_list[i - 1] = self.__extention_list[i - 1], self.__extention_list[i]
                 self.__extention_list_lock.release()
-                self.__send_heartbeat()
                 return str(i - 1)
         self.__extention_list_lock.release()
         return "Not found extention", 404
@@ -129,7 +128,6 @@ class Extention_MainServer:
                     return "Already last extention", 400
                 self.__extention_list[i], self.__extention_list[i + 1] = self.__extention_list[i + 1], self.__extention_list[i]
                 self.__extention_list_lock.release()
-                self.__send_heartbeat()
                 return str(i + 1)
         self.__extention_list_lock.release()
         return "Not found extention", 404

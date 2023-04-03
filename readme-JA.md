@@ -1,6 +1,6 @@
 <p align="center">
-  <img src="https://github.com/rera-vrc/OSC-SRTC/blob/main/imgs/Dark-Logo.png?raw=true#gh-dark-mode-only" height="200">
-  <img src="https://github.com/rera-vrc/OSC-SRTC/blob/main/imgs/Light-Logo.png?raw=true#gh-light-mode-only" height="200">
+  <img src="https://github.com/rera-vrc/OSC-SRTC/blob/main/imgs/Dark-Logo.png?raw=true#gh-dark-mode-only" height="200" width="700">
+  <img src="https://github.com/rera-vrc/OSC-SRTC/blob/main/imgs/Light-Logo.png?raw=true#gh-light-mode-only" height="200" width="700">
   </br>
 
 </p>

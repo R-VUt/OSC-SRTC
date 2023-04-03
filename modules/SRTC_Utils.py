@@ -2,6 +2,10 @@ import sys
 import os
 import json
 
+import requests
+from bs4 import BeautifulSoup
+from CTkMessagebox import CTkMessagebox
+
 default_settings = '''
 {
 	"osc_ip" : "127.0.0.1",
@@ -9,6 +13,7 @@ default_settings = '''
 	
 	"osc_serv_ip" : "127.0.0.1",
 	"osc_serv_port" : 9001,
+    "http_ext_port" : 9002,
 	
 	"azure_key" : "",
 	"azure_location" : "",
@@ -47,9 +52,6 @@ def clear_screen():
     os.system("cls" if os.name == "nt" else "clear")
 
 def update_check(ver: int) -> None:
-    import requests
-    from bs4 import BeautifulSoup
-    from CTkMessagebox import CTkMessagebox
     try:
         url = "https://rera-c.booth.pm/items/4217922"
         res = requests.get(url)

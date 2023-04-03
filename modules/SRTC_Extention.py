@@ -34,27 +34,30 @@ from flask import Flask, request
 
 class Extention_MainServer:
 
+    def __send_heartbeat(self):
+        i=0
+        while i < len(self.__extention_list):
+            self.__extention_list_lock.acquire()
+            try:
+                heartbeat_res = requests.get(f"http://{self.__extention_list[i]['ip']}:{self.__extention_list[i]['port']}/extention/heartbeat?num={i}")
+
+                if heartbeat_res.status_code != 200:
+                    self.__extention_list[i]["heartbeat-fail"] += 1
+                else:
+                    self.__extention_list[i]["heartbeat-fail"] = 0
+            except:
+                    self.__extention_list[i]["heartbeat-fail"] += 1
+            finally:
+                if self.__extention_list[i]["heartbeat-fail"] >= 2:
+                    self.__log(f"[Extention] {self.__extention_list[i]['name']} heartbeat failed. Removing extention.")
+                    del self.__extention_list[i]
+                else:
+                    i += 1
+                self.__extention_list_lock.release()
+
     def __heartbeat_check(self):
         while True:
-            i=0
-            while i < len(self.__extention_list):
-                self.__extention_list_lock.acquire()
-                try:
-                    heartbeat_res = requests.get(f"http://{self.__extention_list[i]['ip']}:{self.__extention_list[i]['port']}/extention/heartbeat?num={i}")
-
-                    if heartbeat_res.status_code != 200:
-                        self.__extention_list[i]["heartbeat-fail"] += 1
-                    else:
-                        self.__extention_list[i]["heartbeat-fail"] = 0
-                except:
-                        self.__extention_list[i]["heartbeat-fail"] += 1
-                finally:
-                    if self.__extention_list[i]["heartbeat-fail"] >= 2:
-                        self.__log(f"[Extention] {self.__extention_list[i]['name']} heartbeat failed. Removing extention.")
-                        del self.__extention_list[i]
-                    else:
-                        i += 1
-                    self.__extention_list_lock.release()
+            self.__send_heartbeat()
             time.sleep(5)
 
     def __init__(self, server_ip: str, port: int, log: callable):
@@ -68,7 +71,14 @@ class Extention_MainServer:
         self.__server.add_url_rule("/extention/register", view_func=self.__register_extention, methods=["GET"])
         self.__server.add_url_rule("/extention/forward", view_func=self.__forward_extention, methods=["GET"])
         self.__server.add_url_rule("/extention/backward", view_func=self.__backward_extention, methods=["GET"])
+        self.__server.add_url_rule("/extention/test", view_func=self.__extention_test, methods=["GET"])
         self.__log = log
+
+    def __extention_test(self):
+        msg = request.args.get("message")
+        self.__log(f"[Extention] testing [{msg}]")
+        msg = self.execute_extention(msg)
+        return msg
 
 
     def __register_extention(self):
@@ -102,6 +112,7 @@ class Extention_MainServer:
                     return "Already first extention", 400
                 self.__extention_list[i], self.__extention_list[i - 1] = self.__extention_list[i - 1], self.__extention_list[i]
                 self.__extention_list_lock.release()
+                self.__send_heartbeat()
                 return str(i - 1)
         self.__extention_list_lock.release()
         return "Not found extention", 404
@@ -118,6 +129,7 @@ class Extention_MainServer:
                     return "Already last extention", 400
                 self.__extention_list[i], self.__extention_list[i + 1] = self.__extention_list[i + 1], self.__extention_list[i]
                 self.__extention_list_lock.release()
+                self.__send_heartbeat()
                 return str(i + 1)
         self.__extention_list_lock.release()
         return "Not found extention", 404
@@ -127,6 +139,7 @@ class Extention_MainServer:
         extention_len = len(self.__extention_list)
 
         execute_result = message
+        i = 0
         while i < extention_len:
             try:
                 req_data = requests.get(f"http://{self.__extention_list[i]['ip']}:{self.__extention_list[i]['port']}/extention/execute?message={execute_result}")
@@ -135,6 +148,7 @@ class Extention_MainServer:
                     if execute_result == "{Sended-Already}":
                         break
                     i += 1
+
                 else:
                     # 익스텐션 서버가 응답하지 않는다면 제거
                     del self.__extention_list[i]

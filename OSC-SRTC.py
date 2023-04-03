@@ -227,9 +227,10 @@ def main_thread():
           
 
         if to_send_message != "":
+          print_log("[Info] Executing extention...")
+          to_send_message = Extention_System.execute_extention(to_send_message)
           print_log("[Info] Sending message: " + to_send_message)
           print_log(" ")
-          to_send_message = Extention_System.execute_extention(to_send_message)
           if to_send_message != "{Sended-Already}":
             OSC_Client.send_message("/chatbox/input", [to_send_message, True])
     except:

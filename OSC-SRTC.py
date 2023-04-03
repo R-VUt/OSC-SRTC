@@ -25,8 +25,8 @@ Extention_Port = 9002
 log_temp = ""
 log_temp_printed = False
 
-version = "V4E"
-version_RCUPD = 13
+version = "V4E1"
+version_RCUPD = 14
 
 TK: CTk = None
 Button_Start: CTkButton = None

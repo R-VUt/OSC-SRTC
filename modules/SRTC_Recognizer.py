@@ -1,6 +1,8 @@
 import threading
 import time
 import speech_recognition as sr
+import pyaudio
+import numpy as np
 from playsound import playsound
 
 from modules.SRTC_Utils import *
@@ -88,45 +90,69 @@ class SRecognizer:
             return self.__speech_recognition.recognize_etri(audio, self.__etri_key, ETRI_Supported_Languages[language])
         else:
             return ""
-    
-    def ListenAndRecognize(self, recognizer: str, language: str, stop_event: threading.Event(), selected_device: int = 0, is_ptt: bool = False, ptt_event: threading.Event() = None) -> str:
-        """
-        Listen and recognize the audio data.
 
-        if error occurs, return empty string. 
-        """
-        
+
+    def ListenAndRecognize(self, recognizer: str, language: str, stop_event: threading.Event(),
+                           selected_device: int = 0, is_ptt: bool = False, ptt_event: threading.Event() = None,
+                           vad_threshold: int = 300, min_record_time: float = 1.0) -> str:
+        CHUNK = 1024
+        FORMAT = pyaudio.paInt16
+        CHANNELS = 1
+        RATE = 16000
+
+        p = pyaudio.PyAudio()
+        stream = p.open(format=FORMAT,
+                        channels=CHANNELS,
+                        rate=RATE,
+                        input=True,
+                        input_device_index=selected_device,
+                        frames_per_buffer=CHUNK)
+
         r = sr.Recognizer()
+        min_record_chunks = int(min_record_time * RATE / CHUNK)
         while not stop_event.is_set():
-          with sr.Microphone(device_index=selected_device) as source:
-              if is_ptt:
-                  while ptt_event.is_set():
-                      if stop_event.is_set():
-                          return ""
-                      time.sleep(0.1)
+            audio_data = stream.read(CHUNK)
+            audio_data_int = np.frombuffer(audio_data, dtype=np.int16)
 
-              playsound(resource_path("resources\\1.wav").replace("\\", "/"), block=False)
-              self.__print_log("[SRecognizer][Info] Listening...")
+            if np.abs(audio_data_int).mean() > vad_threshold or (is_ptt and not ptt_event.is_set()):
+                if is_ptt:
+                    while ptt_event.is_set():
+                        if stop_event.is_set():
+                            return ""
+                        time.sleep(0.1)
 
-              try:
-                  if is_ptt:
-                      audio = r.listen(source, timeout=20, phrase_time_limit=20, stopper=stop_event, ptt_end=ptt_event)
-                  else:
-                      audio = r.listen(source, timeout=20, phrase_time_limit=20, stopper=stop_event)
-              except sr.WaitTimeoutError:
-                  self.__print_log("[SRecognizer][Error] Timeout")
-                  continue
-              except sr.StopperSet:
-                  self.__print_log("[SRecognizer][Info] Successfully stopped listening")
-                  return ""
-              
-              self.__print_log("[SRecognizer][Info] Recognizing...")
-              try:
-                  return self.Recognize(recognizer, language, audio)
-              except sr.UnknownValueError:
-                  self.__print_log("[SRecognizer][Error] Unknown Value")
-                  return ""
-              except sr.RequestError as e:
-                  self.__print_log("[SRecognizer][Error] Request Error")
-                  return ""
+                self.__print_log("[SRecognizer][Info] Listening...")
+
+                audio_buffer = [audio_data]
+                vad_below_threshold = 0
+                while True:
+                    audio_data = stream.read(CHUNK)
+                    audio_buffer.append(audio_data)
+                    audio_data_int = np.frombuffer(audio_data, dtype=np.int16)
+
+                    if np.abs(audio_data_int).mean() <= vad_threshold:
+                        vad_below_threshold += 1
+                        if vad_below_threshold > min_record_chunks:
+                            break
+                    else:
+                        vad_below_threshold = 0
+
+                audio_data = b''.join(audio_buffer)
+                audio = sr.AudioData(audio_data, RATE, 2)
+
+                self.__print_log("[SRecognizer][Info] Recognizing...")
+                try:
+                    return self.Recognize(recognizer, language, audio)
+                except sr.UnknownValueError:
+                    self.__print_log("[SRecognizer][Error] Unknown Value")
+                except sr.RequestError as e:
+                    self.__print_log("[SRecognizer][Error] Request Error")
+
+            else:
+                continue
+
+        stream.stop_stream()
+        stream.close()
+        p.terminate()
+        return ""
               

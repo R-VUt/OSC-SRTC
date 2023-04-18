@@ -14,6 +14,9 @@ default_settings = '''
 	"osc_serv_ip" : "127.0.0.1",
 	"osc_serv_port" : 9001,
     "http_ext_port" : 9002,
+
+    "mic_vad_thresold" : 300,
+    "mic_min_record_time" : 1.0, 
 	
 	"azure_key" : "",
 	"azure_location" : "",

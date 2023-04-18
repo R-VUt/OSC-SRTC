@@ -22,11 +22,14 @@ OSC_Recv_IP = "127.0.0.1"
 OSC_Recv_Port = 9001
 Extension_Port = 9002
 
+mic_vad_thresold = 300
+mic_min_record_time = 1.0
+
 log_temp = ""
 log_temp_printed = False
 
-version = "V4E1"
-version_RCUPD = 14
+version = "V4F"
+version_RCUPD = 15
 
 TK: CTk = None
 Button_Start: CTkButton = None
@@ -114,6 +117,9 @@ def initialize():
   global OSC_Server
   global Extension_System
 
+  global mic_vad_thresold
+  global mic_min_record_time
+
   global OSC_Send_IP
   global OSC_Send_Port
   global OSC_Recv_IP
@@ -132,6 +138,11 @@ def initialize():
     OSC_Recv_IP = settings.get("osc_serv_ip")
   if settings.get("osc_serv_port"):
     OSC_Recv_Port = settings.get("osc_serv_port")
+  
+  if settings.get("mic_vad_thresold"):
+    mic_vad_thresold = settings.get("mic_vad_thresold")
+  if settings.get("mic_min_record_time"):
+    mic_min_record_time = settings.get("mic_min_record_time")
   
   if settings.get("extension_port"):
     Extension_Port = settings.get("extension_port")
@@ -193,7 +204,7 @@ def main_thread():
   while not Stop_Event.is_set():
     try:
       recognized = Recognizer.ListenAndRecognize(Recognizer_Selection.get(), Source_Selection.get(),
-                                                Stop_Event, Recognizer.getDevices().index(Device_Selection.get()), is_ptt, PTT_End)
+                                                Stop_Event, Recognizer.getDevices().index(Device_Selection.get()), is_ptt, PTT_End, mic_vad_thresold, mic_min_record_time)
       to_send_message = ""
 
       if recognized != "":

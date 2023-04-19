@@ -3,7 +3,8 @@ import time
 import speech_recognition as sr
 import pyaudio
 import numpy as np
-from playsound import playsound
+
+import simpleaudio as sa
 
 from modules.SRTC_Utils import *
 
@@ -30,6 +31,7 @@ class SRecognizer:
         self.__Registered_Recognizers: list[str] = ["Google WebSpeech"] # now supports Google, Azure, ETRI
         self.__print_log = log;
         self.__print_log("[SRecognizer][Info] Initializing Speech Recognition...")
+        self.__beep_sound = sa.WaveObject.from_wave_file(resource_path("resources\\1.wav").replace("\\", "/"))
 
         # Recognizer Key Settings
         if settings.get("azure_key") and settings.get("azure_location"):
@@ -108,8 +110,13 @@ class SRecognizer:
                         input_device_index=selected_device,
                         frames_per_buffer=CHUNK)
 
-        r = sr.Recognizer()
         min_record_chunks = int(min_record_time * RATE / CHUNK)
+
+        #playsound(resource_path("resources\\1.wav").replace("\\", "/"), block=False)
+        self.__beep_sound.play()
+
+        self.__print_log("[SRecognizer][Info] Listener is ready.")
+
         while not stop_event.is_set():
             audio_data = stream.read(CHUNK)
             audio_data_int = np.frombuffer(audio_data, dtype=np.int16)
@@ -118,9 +125,9 @@ class SRecognizer:
                 if is_ptt:
                     while ptt_event.is_set():
                         if stop_event.is_set():
+                            print ("[SRecognizer][Info] Stopped Listening.")
                             return ""
                         time.sleep(0.1)
-
                 self.__print_log("[SRecognizer][Info] Listening...")
 
                 audio_buffer = [audio_data]
@@ -150,6 +157,8 @@ class SRecognizer:
 
             else:
                 continue
+        if stop_event.is_set():
+            self.__print_log("[SRecognizer][Info] Stopped Listening.")
 
         stream.stop_stream()
         stream.close()

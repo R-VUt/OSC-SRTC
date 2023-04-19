@@ -3,7 +3,7 @@ deepl-translate==1.2.0
 python-osc==1.8.0
 simpleaudio==1.0.4
 flask == 2.1.2 
--e git+https://github.com/soumt-r/speech_recognition_KR_APIs#egg=speechrecognition
+git+https://github.com/soumt-r/speech_recognition_KR_APIs#egg=speechrecognition
 beautifulsoup4~=4.11.1
 requests~=2.28.1
 pykakasi~=2.2.1

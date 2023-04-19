@@ -31,7 +31,7 @@ jobs:
           Write-Output "::endgroup::"
 
       - name: build
-        run: pyinstaller --onefile --noconsole --exclude torch --exclude numpy --exclude tensorflow --exclude pandas --add-data "./resources;resources" --add-data "C:/hostedtoolcache/windows/Python/3.10.4/x64/Lib/site-packages/pykakasi/data;pykakasi\\data" --add-data "./modules;modules" --add-data "C:/hostedtoolcache/windows/Python/3.10.4/x64/Lib/site-packages/customtkinter;customtkinter" --add-data "C:/hostedtoolcache/windows/Python/3.10.4/x64/Lib/site-packages/speech_recognition;speech_recognition" --add-data "C:/hostedtoolcache/windows/Python/3.10.4/x64/Lib/site-packages/CTkMessagebox;CTkMessagebox" --icon resources/logo.ico OSC-SRTC.py
+        run: pyinstaller --onefile --noconsole --exclude torch --exclude numpy --exclude tensorflow --exclude pandas --add-data "./resources;resources" --add-data "C:/hostedtoolcache/windows/Python/3.10.4/x64/Lib/site-packages/pykakasi/data;pykakasi\\data" --add-data "./modules;modules" --add-data "C:/hostedtoolcache/windows/Python/3.10.4/x64/Lib/site-packages/customtkinter;customtkinter" --add-data "C:/hostedtoolcache/windows/Python/3.10.4/x64/src/speechrecognition/speech_recognition;speech_recognition" --add-data "C:/hostedtoolcache/windows/Python/3.10.4/x64/Lib/site-packages/CTkMessagebox;CTkMessagebox" --icon resources/logo.ico OSC-SRTC.py
   
       - name: upload
         uses: actions/upload-artifact@v1

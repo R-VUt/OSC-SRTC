@@ -1,0 +1,75 @@
+name: test_build
+on:
+  push:
+    tags:
+      - "t*"
+
+jobs:
+  windows-build:
+    runs-on: windows-latest
+    steps:
+      - name: Checkout commit
+        uses: actions/checkout@master
+
+      - name: Set up Python 3.10.4
+        uses: actions/setup-python@master
+        with: { python-version: 3.10.4 }
+
+      - name: Upgrade pip
+        run: python -m pip install --upgrade pip PyInstaller
+      
+      - name: Install Requirements
+        run: pip install -r requirements.txt
+
+      - name: patch deepl-translate
+        run: |
+          Write-Output "::group::patching"
+          (gc C:/hostedtoolcache/windows/Python/3.10.4/x64/Lib/site-packages/deepl/settings.py ).replace('"Swedish"},', '"Swedish"}, {"code": "KO", "language": "Korean"},') | Set-Content C:/hostedtoolcache/windows/Python/3.10.4/x64/Lib/site-packages/deepl/settings.py
+          Write-Output "::endgroup::"
+          Write-Output "::group::patched"
+          gc C:/hostedtoolcache/windows/Python/3.10.4/x64/Lib/site-packages/deepl/settings.py 
+          Write-Output "::endgroup::"
+
+      - name: build
+        run: pyinstaller --onefile --noconsole --exclude torch --exclude tensorflow --exclude pandas --add-data "./resources;resources" --add-data "C:/hostedtoolcache/windows/Python/3.10.4/x64/Lib/site-packages/pykakasi/data;pykakasi\\data" --add-data "./modules;modules" --add-data "C:/hostedtoolcache/windows/Python/3.10.4/x64/Lib/site-packages/customtkinter;customtkinter" --add-data "C:/hostedtoolcache/windows/Python/3.10.4/x64/Lib/site-packages/CTkMessagebox;CTkMessagebox" --icon resources/logo.ico OSC-SRTC.py
+  
+      - name: upload
+        uses: actions/upload-artifact@v1
+        with:
+          name: SRTC-windows
+          path: dist/OSC-SRTC.exe
+
+  release:
+    needs: [windows-build]
+    runs-on: ubuntu-latest
+
+    steps:    
+      - name: Download Windows
+        uses: actions/download-artifact@v1
+        with:
+          name: SRTC-windows
+
+      - name: Create Release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ github.ref }}
+          release_name: Release ${{ github.ref }}
+          draft: false
+          prerelease: true
+
+      - name: Zip
+        run: |
+          zip --junk-paths SRTC-windows ./SRTC-windows/OSC-SRTC.exe 
+
+      - name: Append Binary
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./SRTC-windows.zip
+          asset_name: SRTC-windows.zip
+          asset_content_type: application/zip

@@ -151,9 +151,9 @@ class SRecognizer:
                 try:
                     return self.Recognize(recognizer, language, audio)
                 except sr.UnknownValueError:
-                    self.__print_log("[SRecognizer][Error] Unknown Value")
+                    self.__print_log("[SRecognizer][Error] Unknown Value, recognizer couldn't understand the audio.")
                 except sr.RequestError as e:
-                    self.__print_log("[SRecognizer][Error] Request Error")
+                    self.__print_log("[SRecognizer][Error] Request Error : " + e.with_traceback())
 
             else:
                 continue

@@ -11,8 +11,8 @@ class SRTC_GUI(CTk):
     def set_property_value(self, key: str, value):
         self._properties[key].set(value)
 
-    def set_listbox_list(self, key: str, list: list):
-        self._properties[key].configure(values=list)
+    def set_listbox_list(self, key: str, change: list):
+        self._properties[key].configure(values=change)
         self._properties[key].set(list[0])
 
     def set_callback(self, key: str, callback):

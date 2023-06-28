@@ -106,14 +106,13 @@ def initialize():
         import pyi_splash
 
         pyi_splash.close()
-    except:
+    except ImportError:
         pass
 
     GUI.mainloop()
 
 
 def main_thread():
-    # clear_screen()
     GUI.clear_log()
     GUI.print_log("[Info] Main thread started.")
 
@@ -180,7 +179,7 @@ def main_thread():
                     GUI.print_log(" ")
                     if to_send_message != "{Sended-Already}":
                         OSC.send("/chatbox/input", [to_send_message, True])
-        except:
+        except Exception:
             GUI.print_log("[Error] Could not recognize or translate.")
 
 
@@ -190,7 +189,7 @@ def start_main_thread():
     is_running = True
 
     GUI.set_ui_text("start_button", "Stop")
-    GUI.set_callback("start_button", lambda: stop_main_thread())
+    GUI.set_callback("start_button", stop_main_thread)
 
     Stop_Event.clear()
     OSC.send("/avatar/parameters/SRTC/OnOff", True)
@@ -211,7 +210,7 @@ def stop_main_thread():
     is_running = False
 
     GUI.set_ui_text("start_button", "Start")
-    GUI.set_callback("start_button", lambda: start_main_thread())
+    GUI.set_callback("start_button", start_main_thread)
 
     Stop_Event.set()
     OSC.send("/avatar/parameters/SRTC/OnOff", False)
@@ -280,7 +279,7 @@ def option_changed(*args):
 
 # OSC Server Functions
 def OSC_SetTarget(*data):
-    (link, lang_id) = data
+    (_, lang_id) = data
 
     if GUI.get_property_value("target_option") != Supported_Languages[lang_id]:
         GUI.set_property_value("target_option", Supported_Languages[lang_id])
@@ -288,7 +287,7 @@ def OSC_SetTarget(*data):
 
 
 def OSC_SetSource(*data):
-    (link, lang_id) = data
+    (_, lang_id) = data
 
     if GUI.get_property_value("source_option") != Supported_Languages[lang_id]:
         GUI.set_property_value("target_option", Supported_Languages[lang_id])
@@ -296,7 +295,7 @@ def OSC_SetSource(*data):
 
 
 def OSC_SetOnOff(*data):
-    (link, on_off) = data
+    (_, on_off) = data
     if on_off:
         if not is_running:
             start_main_thread()
@@ -306,7 +305,7 @@ def OSC_SetOnOff(*data):
 
 
 def OSC_SetPTT(*data):
-    (link, mode) = data
+    (_, mode) = data
 
     global is_ptt
     is_ptt = mode
@@ -314,7 +313,7 @@ def OSC_SetPTT(*data):
 
 
 def OSC_PTTButton(*data):
-    (link, ptt) = data
+    (_, ptt) = data
     if ptt:
         GUI.print_log("[INFO] PTT Start")
         PTT_End.clear()

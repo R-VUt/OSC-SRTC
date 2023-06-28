@@ -47,7 +47,7 @@ class SRTC_Extension:
                     self.__extension_list[i]["heartbeat-fail"] += 1
                 else:
                     self.__extension_list[i]["heartbeat-fail"] = 0
-            except:
+            except Exception:
                 self.__extension_list[i]["heartbeat-fail"] += 1
             finally:
                 if self.__extension_list[i]["heartbeat-fail"] >= 2:
@@ -139,7 +139,7 @@ class SRTC_Extension:
         self.__log(f"[Extension] {name} moving backward.")
 
         self.__extension_list_lock.acquire()
-        for i in range(len(self.__extension_list)):
+        for i, _ in enumerate(self.__extension_list):
             if self.__extension_list[i]["name"] == name:
                 if i == len(self.__extension_list) - 1:
                     self.__extension_list_lock.release()
@@ -174,7 +174,7 @@ class SRTC_Extension:
                     # 익스텐션 서버가 응답하지 않는다면 제거
                     del self.__extension_list[i]
                     extension_len -= 1
-            except:
+            except Exception:
                 pass
 
         self.__extension_list_lock.release()

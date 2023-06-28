@@ -146,7 +146,7 @@ class SRTC_Recognizer:
                 audio,
                 key=self.__azure_key,
                 language=Azure_Supported_Languages[language],
-                region=self.__azure_location,
+                location=self.__azure_location,
             )
         if recognizer == "ETRI Speech":
             return self.__speech_recognition.recognize_etri(
@@ -182,7 +182,6 @@ class SRTC_Recognizer:
 
         min_record_chunks = int(min_record_time * RATE / CHUNK)
 
-        # playsound(resource_path("resources\\1.wav").replace("\\", "/"), block=False)
         self.__beep_sound.play()
 
         self.__print_log("[Recognizer][Info] Listener is ready.")

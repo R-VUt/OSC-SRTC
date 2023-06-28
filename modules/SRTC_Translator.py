@@ -91,8 +91,7 @@ class SRTC_Translator:
             response_body = response.read()
             translated = json.loads(response_body.decode("utf-8"))
             return translated["message"]["result"]["translatedText"]
-        else:
-            return -1
+        return -1
 
     def getRegisteredTranslators(self) -> list[str]:
         """
@@ -106,12 +105,11 @@ class SRTC_Translator:
         """
         if translator == "Google Translate":
             return language in Google_Supported_Languages
-        elif translator == "DeepL":
+        if translator == "DeepL":
             return language in DeepL_Supported_Languages
-        elif translator == "Papago":
+        if translator == "Papago":
             return language in Papago_Supported_Languages
-        else:
-            return False
+        return False
 
     def RomajiConvert(self, text: str) -> str:
         converter = kakasi()
@@ -135,18 +133,17 @@ class SRTC_Translator:
                 dest=Google_Supported_Languages[target_language],
             ).text
 
-        elif translator == "DeepL":
+        if translator == "DeepL":
             return deepl.translate(
                 target_language=DeepL_Supported_Languages[target_language],
                 source_language=DeepL_Supported_Languages[source_language],
                 text=text,
             )
 
-        elif translator == "Papago":
+        if translator == "Papago":
             return self.__papago_translate(
                 Papago_Supported_Languages[source_language],
                 Papago_Supported_Languages[target_language],
                 text,
             )
-        else:
-            return -1
+        return -1

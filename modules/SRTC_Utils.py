@@ -60,7 +60,7 @@ def load_settings() -> dict:
 
 
 def clear_screen():
-    """ Clear console (not used)"""
+    """Clear console (not used)"""
     os.system("cls" if os.name == "nt" else "clear")
 
 

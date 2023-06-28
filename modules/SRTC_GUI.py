@@ -3,6 +3,7 @@ from PIL import Image
 
 from modules.SRTC_Utils import resource_path
 
+
 class SRTC_GUI(ctk.CTk):
     def get_property_value(self, key: str):
         """Get the value of the specified property"""

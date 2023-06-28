@@ -28,9 +28,7 @@ class SRTC_OSC:
 
     def start_server(self):
         """Start OSC server"""
-        self._OSC_Server = (
-            osc_server.ThreadingOSCUDPServer(
-                (self._OSC_Recv_IP, self._OSC_Recv_Port), self._disp
-            )
+        self._OSC_Server = osc_server.ThreadingOSCUDPServer(
+            (self._OSC_Recv_IP, self._OSC_Recv_Port), self._disp
         )
         threading.Thread(target=self._OSC_Server.serve_forever).start()

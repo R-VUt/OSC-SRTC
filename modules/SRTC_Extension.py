@@ -102,10 +102,10 @@ class SRTC_Extension:
 
         self.__extension_list_lock.acquire()
 
-        for i in range(len(self.__extension_list)):
-            if self.__extension_list[i]["name"] == name:
-                self.__extension_list[i]["ip"] = ip
-                self.__extension_list[i]["port"] = port
+        for i, item in enumerate(self.__extension_list):
+            if item["name"] == name:
+                item["ip"] = ip
+                item["port"] = port
                 self.__extension_list_lock.release()
                 return str(i)
 

@@ -32,7 +32,8 @@ import time
 import requests
 from flask import Flask, request
 
-class Extension_Main_Server:
+
+class SRTC_Extension:
 
     def __send_heartbeat(self):
         i=0
@@ -60,19 +61,23 @@ class Extension_Main_Server:
             self.__send_heartbeat()
             time.sleep(2)
 
-    def __init__(self, server_ip: str, port: int, log: callable):
-        self.__server_ip = server_ip
-        self.__port = port
+    def __init__(self, settings: dict, log: callable):
+        self.__server_ip = settings.get("osc_serv_ip") or "127.0.0.1"
+        self.__port = settings.get("extension_port") or "9002"
         self.__extension_list = []
         self.__extension_list_lock = threading.Lock()
+        self.__log = log
+
+        self.__log("[Extension][Info] Initializing extension server...")
 
         self.__server = Flask(__name__)
+
 
         self.__server.add_url_rule("/extension/register", view_func=self.__register_extension, methods=["GET"])
         self.__server.add_url_rule("/extension/forward", view_func=self.__forward_extension, methods=["GET"])
         self.__server.add_url_rule("/extension/backward", view_func=self.__backward_extension, methods=["GET"])
         self.__server.add_url_rule("/extension/test", view_func=self.__extension_test, methods=["GET"])
-        self.__log = log
+        
 
     def __extension_test(self):
         msg = request.args.get("message")

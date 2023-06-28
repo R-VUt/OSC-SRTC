@@ -6,7 +6,7 @@ import numpy as np
 
 import simpleaudio as sa
 
-from SRTC_Utils import resource_path
+from modules.SRTC_Utils import resource_path
 
 # Recognizer Language Codes
 Google_Supported_Languages: dict[str, str] = {

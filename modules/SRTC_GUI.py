@@ -3,7 +3,6 @@ from PIL import Image
 
 from modules.SRTC_Utils import resource_path
 
-
 class SRTC_GUI(ctk.CTk):
     def get_property_value(self, key: str):
         """Get the value of the specified property"""
@@ -16,7 +15,7 @@ class SRTC_GUI(ctk.CTk):
     def set_listbox_list(self, key: str, change: list):
         """Set the list of the specified listbox"""
         self._properties[key].configure(values=change)
-        self._properties[key].set(list[0])
+        self._properties[key].set(change[0])
 
     def set_callback(self, key: str, callback):
         """Set the callback function of the specified property"""

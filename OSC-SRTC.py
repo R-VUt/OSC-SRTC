@@ -1,7 +1,8 @@
 import threading
 import time
+import sys
 
-from modules.SRTC_Utils import *
+from modules.SRTC_Utils import load_settings, update_check
 from modules.SRTC_GUI import SRTC_GUI
 from modules.SRTC_Recognizer import SRTC_Recognizer
 from modules.SRTC_Translator import SRTC_Translator

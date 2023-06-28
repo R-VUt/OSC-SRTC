@@ -13,6 +13,7 @@ class SRTC_OSC:
 
         self._disp = dispatcher.Dispatcher()
 
+        self._OSC_Server: osc_server.ThreadingOSCUDPServer = None
         self._OSC_Client: udp_client.SimpleUDPClient = udp_client.SimpleUDPClient(
             self._OSC_Send_IP, self._OSC_Send_Port
         )
@@ -24,7 +25,7 @@ class SRTC_OSC:
         self._disp.map(address, callback)
 
     def start_server(self):
-        self._OSC_Server: osc_server.ThreadingOSCUDPServer = (
+        self._OSC_Server = (
             osc_server.ThreadingOSCUDPServer(
                 (self._OSC_Recv_IP, self._OSC_Recv_Port), self._disp
             )

@@ -79,7 +79,6 @@ class SRTC_Translator:
         # ----------------------------------------------
 
     def __papago_translate(self, source, target, text):
-        
         papago_url: str = "https://openapi.naver.com/v1/papago/n2mt"
 
         headers = {
@@ -93,8 +92,7 @@ class SRTC_Translator:
         if res_code == 200:
             translated = json.loads(response.text)
             return translated["message"]["result"]["translatedText"]
-        else:
-            return -1
+        return -1
 
     def getRegisteredTranslators(self) -> list[str]:
         """

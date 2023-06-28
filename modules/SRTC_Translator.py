@@ -99,7 +99,8 @@ class SRTC_Translator:
         """
         return self.__Registered_Translators
 
-    def isLanguageSupported(self, translator: str, language: str) -> bool:
+    @staticmethod
+    def isLanguageSupported(translator: str, language: str) -> bool:
         """
         Check if the language is supported by the translator.
         """
@@ -111,7 +112,8 @@ class SRTC_Translator:
             return language in Papago_Supported_Languages
         return False
 
-    def RomajiConvert(self, text: str) -> str:
+    @staticmethod
+    def RomajiConvert(text: str) -> str:
         converter = kakasi()
 
         tmp = ""

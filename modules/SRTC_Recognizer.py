@@ -26,11 +26,11 @@ ETRI_Supported_Languages: dict[str, str]   = {"English" : "english", "Korean" : 
                                               "Arabic" : "arabic", "Thai": "thai", "Dutch" : "dutch"}
 # ----------------------------------------------
 
-class SRecognizer:
+class SRTC_Recognizer:
     def __init__(self, settings: dict, log):
         self.__Registered_Recognizers: list[str] = ["Google WebSpeech"] # now supports Google, Azure, ETRI
         self.__print_log = log;
-        self.__print_log("[SRecognizer][Info] Initializing Speech Recognition...")
+        self.__print_log("[Recognizer][Info] Initializing Speech Recognition...")
         self.__beep_sound = sa.WaveObject.from_wave_file(resource_path("resources\\1.wav").replace("\\", "/"))
 
         # Recognizer Key Settings
@@ -38,12 +38,12 @@ class SRecognizer:
             self.__Registered_Recognizers.append("Azure Speech")
             self.__azure_key = settings.get("azure_key")
             self.__azure_location = settings.get("azure_location")
-            self.__print_log("[SRecognizer][Info] Azure Speech Cognitive API is enabled.")
+            self.__print_log("[Recognizer][Info] Azure Speech Cognitive API is enabled.")
 
         if settings.get("etri_key"):
             self.__Registered_Recognizers.append("ETRI Speech")
             self.__etri_key = settings.get("etri_key")
-            self._print_log("[SRecognizer][Info] ETRI API is enabled.")
+            self._print_log("[Recognizer][Info] ETRI API is enabled.")
         # ----------------------------------------------
 
         self.__speech_recognition = sr.Recognizer()
@@ -115,7 +115,7 @@ class SRecognizer:
         #playsound(resource_path("resources\\1.wav").replace("\\", "/"), block=False)
         self.__beep_sound.play()
 
-        self.__print_log("[SRecognizer][Info] Listener is ready.")
+        self.__print_log("[Recognizer][Info] Listener is ready.")
 
         while not stop_event.is_set():
             audio_data = stream.read(CHUNK)
@@ -125,10 +125,10 @@ class SRecognizer:
                 if is_ptt:
                     while ptt_event.is_set():
                         if stop_event.is_set():
-                            print ("[SRecognizer][Info] Stopped Listening.")
+                            print ("[Recognizer][Info] Stopped Listening.")
                             return ""
                         time.sleep(0.1)
-                self.__print_log("[SRecognizer][Info] Listening...")
+                self.__print_log("[Recognizer][Info] Listening...")
 
                 audio_buffer = [audio_data]
                 vad_below_threshold = 0
@@ -147,18 +147,18 @@ class SRecognizer:
                 audio_data = b''.join(audio_buffer)
                 audio = sr.AudioData(audio_data, RATE, 2)
 
-                self.__print_log("[SRecognizer][Info] Recognizing...")
+                self.__print_log("[Recognizer][Info] Recognizing...")
                 try:
                     return self.Recognize(recognizer, language, audio)
                 except sr.UnknownValueError:
-                    self.__print_log("[SRecognizer][Error] Unknown Value, recognizer couldn't understand the audio.")
+                    self.__print_log("[Recognizer][Error] Unknown Value, recognizer couldn't understand the audio.")
                 except sr.RequestError as e:
-                    self.__print_log("[SRecognizer][Error] Request Error : " + e.with_traceback())
+                    self.__print_log("[Recognizer][Error] Request Error : " + e.with_traceback())
 
             else:
                 continue
         if stop_event.is_set():
-            self.__print_log("[SRecognizer][Info] Stopped Listening.")
+            self.__print_log("[Recognizer][Info] Stopped Listening.")
 
         stream.stop_stream()
         stream.close()

@@ -139,7 +139,7 @@ class SRTC_Extension:
         self.__log(f"[Extension] {name} moving backward.")
 
         self.__extension_list_lock.acquire()
-        for i, _ in enumerate(self.__extension_list):
+        for i in range(len(self.__extension_list)):
             if self.__extension_list[i]["name"] == name:
                 if i == len(self.__extension_list) - 1:
                     self.__extension_list_lock.release()

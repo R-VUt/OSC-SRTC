@@ -1,6 +1,7 @@
 import sys
 import os
 import json
+import webbrowser
 
 import requests
 from bs4 import BeautifulSoup
@@ -51,7 +52,7 @@ def load_settings() -> dict:
         with open("./api_settings.json", "r") as f:
             settings = json.load(f)
     except Exception:
-        pass
+        return {}
     return settings
 
 
@@ -82,10 +83,10 @@ def update_check(ver: int) -> None:
                         )
                         response = msg.get()
                         if response == "Yes":
-                            os.startfile(url)
+                            webbrowser.open(url, new=0, autoraise=True)
                     chk = True
             except Exception:
-                pass
+                chk = False
         if not chk:
             print("[Log-Stelth] Update Check Failed")
     finally:

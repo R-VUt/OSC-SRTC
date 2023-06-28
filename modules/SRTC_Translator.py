@@ -1,7 +1,7 @@
 import json
 from googletrans import Translator
 import deepl
-import urllib
+import requests
 from pykakasi import kakasi
 
 Google_Supported_Languages: dict[str, str] = {
@@ -79,19 +79,22 @@ class SRTC_Translator:
         # ----------------------------------------------
 
     def __papago_translate(self, source, target, text):
-        encText = urllib.parse.quote(text)
-        data: str = "source=" + source + "&target=" + target + "&text=" + encText
+        
         papago_url: str = "https://openapi.naver.com/v1/papago/n2mt"
-        request = urllib.request.Request(papago_url)
-        request.add_header("X-Naver-Client-Id", self.__papago_id)
-        request.add_header("X-Naver-Client-Secret", self.__papago_secret)
-        response = urllib.request.urlopen(request, data=data.encode("utf-8"))
-        res_code = response.getcode()
+
+        headers = {
+            "X-Naver-Client-Id": self.__papago_id,
+            "X-Naver-Client-Secret": self.__papago_secret,
+        }
+        data = {"source": source, "target": target, "text": text}
+        response = requests.post(papago_url, headers=headers, data=data)
+        res_code = response.status_code
+
         if res_code == 200:
-            response_body = response.read()
-            translated = json.loads(response_body.decode("utf-8"))
+            translated = json.loads(response.text)
             return translated["message"]["result"]["translatedText"]
-        return -1
+        else:
+            return -1
 
     def getRegisteredTranslators(self) -> list[str]:
         """

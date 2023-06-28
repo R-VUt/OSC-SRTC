@@ -1,10 +1,10 @@
-from customtkinter import *
+import customtkinter as ctk
 from PIL import Image
 
 from modules.SRTC_Utils import resource_path
 
 
-class SRTC_GUI(CTk):
+class SRTC_GUI(ctk.CTk):
     def get_property_value(self, key: str):
         return self._properties[key].get()
 
@@ -66,94 +66,94 @@ class SRTC_GUI(CTk):
         self.grid_rowconfigure(0, weight=1)
         self.grid_columnconfigure(1, weight=1)
 
-        self._logo_image = CTkImage(
+        self._logo_image = ctk.CTkImage(
             light_image=Image.open(resource_path("resources/logo.jpg")),
             dark_image=Image.open(resource_path("resources/logo.jpg")),
             size=(150, 150),
         )
 
-        self._navigation_frame = CTkFrame(self, corner_radius=0)
-        self._navigation_frame_label = CTkLabel(
+        self._navigation_frame = ctk.CTkFrame(self, corner_radius=0)
+        self._navigation_frame_label = ctk.CTkLabel(
             self._navigation_frame,
             image=self._logo_image,
             compound="top",
-            font=CTkFont(size=17, weight="bold"),
+            font=ctk.CTkFont(size=17, weight="bold"),
         )
 
-        self._settings_tab = CTkTabview(self._navigation_frame, width=220)
+        self._settings_tab = ctk.CTkTabview(self._navigation_frame, width=220)
         self._settings_tab.add("system")
         self._settings_tab.add("output")
 
-        self._mic_label = CTkLabel(
+        self._mic_label = ctk.CTkLabel(
             self._settings_tab.tab("system"), text="Microphone", height=25
         )
-        self._Device_Selection = CTkOptionMenu(
+        self._Device_Selection = ctk.CTkOptionMenu(
             self._settings_tab.tab("system"),
             width=200,
             command=self._option_changed,
             dynamic_resizing=False,
             height=25,
         )
-        self._speech_label = CTkLabel(
+        self._speech_label = ctk.CTkLabel(
             self._settings_tab.tab("system"), text="Speech Recognition", height=25
         )
-        self._Recognizer_Selection = CTkOptionMenu(
+        self._Recognizer_Selection = ctk.CTkOptionMenu(
             self._settings_tab.tab("system"),
             width=200,
             command=self._option_changed,
             dynamic_resizing=False,
             height=25,
         )
-        self._translator_label = CTkLabel(
+        self._translator_label = ctk.CTkLabel(
             self._settings_tab.tab("system"), text="Translator", height=25
         )
-        self._Translator_Selection = CTkOptionMenu(
+        self._Translator_Selection = ctk.CTkOptionMenu(
             self._settings_tab.tab("system"),
             width=200,
             command=self._option_changed,
             dynamic_resizing=False,
             height=25,
         )
-        self._source_label = CTkLabel(
+        self._source_label = ctk.CTkLabel(
             self._settings_tab.tab("output"), text="Source", height=25
         )
-        self._Source_Selection = CTkOptionMenu(
+        self._Source_Selection = ctk.CTkOptionMenu(
             self._settings_tab.tab("output"),
             width=150,
             command=self._option_changed,
             dynamic_resizing=False,
             height=25,
         )
-        self._target_label = CTkLabel(
+        self._target_label = ctk.CTkLabel(
             self._settings_tab.tab("output"), text="Target", height=25
         )
-        self._Target_Selection = CTkOptionMenu(
+        self._Target_Selection = ctk.CTkOptionMenu(
             self._settings_tab.tab("output"),
             width=150,
             command=self._option_changed,
             dynamic_resizing=False,
             height=25,
         )
-        self._target2_label = CTkLabel(
+        self._target2_label = ctk.CTkLabel(
             self._settings_tab.tab("output"), text="Target2", height=25
         )
-        self._Target2_Selection = CTkOptionMenu(
+        self._Target2_Selection = ctk.CTkOptionMenu(
             self._settings_tab.tab("output"),
             width=150,
             command=self._option_changed,
             dynamic_resizing=False,
             height=25,
         )
-        self._Romaji_Mode = IntVar()
+        self._Romaji_Mode = ctk.IntVar()
         self._Romaji_Mode.set(0)
-        self._Romaji_Mode_Checkbox = CTkCheckBox(
+        self._Romaji_Mode_Checkbox = ctk.CTkCheckBox(
             self._settings_tab.tab("output"),
             text="Romaji Mode",
             variable=self._Romaji_Mode,
             command=self._option_changed,
             height=25,
         )
-        self._Button_Start = CTkButton(self._navigation_frame, text="Start")
+        self._Button_Start = ctk.CTkButton(self._navigation_frame, text="Start")
 
         self._properties["version_label"] = self._navigation_frame_label
         self._properties["mic_option"] = self._Device_Selection
@@ -165,15 +165,15 @@ class SRTC_GUI(CTk):
         self._properties["romaji_mode"] = self._Romaji_Mode
         self._properties["start_button"] = self._Button_Start
 
-        self._home_frame = CTkFrame(self, corner_radius=0)
+        self._home_frame = ctk.CTkFrame(self, corner_radius=0)
         self._home_frame.grid_columnconfigure(0, weight=1)
         self._home_frame.grid_rowconfigure(0, weight=1)
 
-        self._log_textbox = CTkTextbox(
+        self._log_textbox = ctk.CTkTextbox(
             self._home_frame, state="disabled", width=400, corner_radius=0
         )
 
-        self._dummy_label = CTkLabel(self._navigation_frame, text="", height=1)
+        self._dummy_label = ctk.CTkLabel(self._navigation_frame, text="", height=1)
         self._dummy_label.pack()
 
         self._navigation_frame.grid(row=0, column=0, sticky="nsew")
@@ -184,7 +184,7 @@ class SRTC_GUI(CTk):
 
         self._settings_tab.pack(expand=True, fill="both")
 
-        dummy_label = CTkLabel(self._settings_tab.tab("system"), text="", height=1)
+        dummy_label = ctk.CTkLabel(self._settings_tab.tab("system"), text="", height=1)
         dummy_label.pack()
 
         self._speech_label.pack()
@@ -205,7 +205,7 @@ class SRTC_GUI(CTk):
         self._target2_label.pack()
         self._Target2_Selection.pack()
 
-        dummy_label = CTkLabel(self._settings_tab.tab("output"), text="", height=1)
+        dummy_label = ctk.CTkLabel(self._settings_tab.tab("output"), text="", height=1)
         dummy_label.pack()
 
         self._Romaji_Mode_Checkbox.pack()

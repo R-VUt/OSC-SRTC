@@ -34,23 +34,26 @@ from flask import Flask, request
 
 
 class SRTC_Extension:
-
     def __send_heartbeat(self):
-        i=0
+        i = 0
         while i < len(self.__extension_list):
             self.__extension_list_lock.acquire()
             try:
-                heartbeat_res = requests.get(f"http://{self.__extension_list[i]['ip']}:{self.__extension_list[i]['port']}/extension/heartbeat?num={i}")
+                heartbeat_res = requests.get(
+                    f"http://{self.__extension_list[i]['ip']}:{self.__extension_list[i]['port']}/extension/heartbeat?num={i}"
+                )
 
                 if heartbeat_res.status_code != 200:
                     self.__extension_list[i]["heartbeat-fail"] += 1
                 else:
                     self.__extension_list[i]["heartbeat-fail"] = 0
             except:
-                    self.__extension_list[i]["heartbeat-fail"] += 1
+                self.__extension_list[i]["heartbeat-fail"] += 1
             finally:
                 if self.__extension_list[i]["heartbeat-fail"] >= 2:
-                    self.__log(f"[Extension] {self.__extension_list[i]['name']} heartbeat failed. Removing extension.")
+                    self.__log(
+                        f"[Extension] {self.__extension_list[i]['name']} heartbeat failed. Removing extension."
+                    )
                     del self.__extension_list[i]
                 else:
                     i += 1
@@ -72,19 +75,24 @@ class SRTC_Extension:
 
         self.__server = Flask(__name__)
 
-
-        self.__server.add_url_rule("/extension/register", view_func=self.__register_extension, methods=["GET"])
-        self.__server.add_url_rule("/extension/forward", view_func=self.__forward_extension, methods=["GET"])
-        self.__server.add_url_rule("/extension/backward", view_func=self.__backward_extension, methods=["GET"])
-        self.__server.add_url_rule("/extension/test", view_func=self.__extension_test, methods=["GET"])
-        
+        self.__server.add_url_rule(
+            "/extension/register", view_func=self.__register_extension, methods=["GET"]
+        )
+        self.__server.add_url_rule(
+            "/extension/forward", view_func=self.__forward_extension, methods=["GET"]
+        )
+        self.__server.add_url_rule(
+            "/extension/backward", view_func=self.__backward_extension, methods=["GET"]
+        )
+        self.__server.add_url_rule(
+            "/extension/test", view_func=self.__extension_test, methods=["GET"]
+        )
 
     def __extension_test(self):
         msg = request.args.get("message")
         self.__log(f"[Extension] testing [{msg}]")
         msg = self.execute_extension(msg)
         return msg
-
 
     def __register_extension(self):
         name = request.args.get("name")
@@ -100,11 +108,13 @@ class SRTC_Extension:
                 self.__extension_list[i]["port"] = port
                 self.__extension_list_lock.release()
                 return str(i)
-        
-        self.__extension_list.append({"name": name, "ip": ip, "port": port, "heartbeat-fail": 0})
+
+        self.__extension_list.append(
+            {"name": name, "ip": ip, "port": port, "heartbeat-fail": 0}
+        )
         self.__extension_list_lock.release()
         return str(len(self.__extension_list) - 1)
-    
+
     def __forward_extension(self):
         name = request.args.get("name")
         self.__log(f"[Extension] {name} moving forward.")
@@ -115,12 +125,15 @@ class SRTC_Extension:
                 if i == 0:
                     self.__extension_list_lock.release()
                     return "Already first extension", 400
-                self.__extension_list[i], self.__extension_list[i - 1] = self.__extension_list[i - 1], self.__extension_list[i]
+                self.__extension_list[i], self.__extension_list[i - 1] = (
+                    self.__extension_list[i - 1],
+                    self.__extension_list[i],
+                )
                 self.__extension_list_lock.release()
                 return str(i - 1)
         self.__extension_list_lock.release()
         return "Not found extension", 404
-    
+
     def __backward_extension(self):
         name = request.args.get("name")
         self.__log(f"[Extension] {name} moving backward.")
@@ -131,12 +144,15 @@ class SRTC_Extension:
                 if i == len(self.__extension_list) - 1:
                     self.__extension_list_lock.release()
                     return "Already last extension", 400
-                self.__extension_list[i], self.__extension_list[i + 1] = self.__extension_list[i + 1], self.__extension_list[i]
+                self.__extension_list[i], self.__extension_list[i + 1] = (
+                    self.__extension_list[i + 1],
+                    self.__extension_list[i],
+                )
                 self.__extension_list_lock.release()
                 return str(i + 1)
         self.__extension_list_lock.release()
         return "Not found extension", 404
-    
+
     def execute_extension(self, message: str):
         self.__extension_list_lock.acquire()
         extension_len = len(self.__extension_list)
@@ -145,7 +161,9 @@ class SRTC_Extension:
         i = 0
         while i < extension_len:
             try:
-                req_data = requests.get(f"http://{self.__extension_list[i]['ip']}:{self.__extension_list[i]['port']}/extension/execute?message={execute_result}")
+                req_data = requests.get(
+                    f"http://{self.__extension_list[i]['ip']}:{self.__extension_list[i]['port']}/extension/execute?message={execute_result}"
+                )
                 if req_data.status_code == 200:
                     execute_result = req_data.text
                     if execute_result == "{Sended-Already}":
@@ -158,19 +176,16 @@ class SRTC_Extension:
                     extension_len -= 1
             except:
                 pass
-        
+
         self.__extension_list_lock.release()
         return execute_result
-    
+
     def start_server(self):
         threading.Thread(target=self.__heartbeat_check).start()
-        #threaded
-        t1 = threading.Thread(target=self.__server.run, kwargs={"host": self.__server_ip, "port": self.__port})
-        t1.daemon= True
+        # threaded
+        t1 = threading.Thread(
+            target=self.__server.run,
+            kwargs={"host": self.__server_ip, "port": self.__port},
+        )
+        t1.daemon = True
         t1.start()
-
-    
-
-
-        
-        

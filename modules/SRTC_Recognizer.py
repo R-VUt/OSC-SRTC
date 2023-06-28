@@ -109,19 +109,22 @@ class SRTC_Recognizer:
         """
         return self.__Registered_Recognizers
 
-    def getDevices(self) -> list[str]:
+    @staticmethod
+    def getDevices() -> list[str]:
         """
         Get a list of devices.
         """
         return sr.Microphone.list_microphone_names()
 
-    def getUsableDevices(self) -> list[str]:
+    @staticmethod
+    def getUsableDevices() -> list[str]:
         """
         Get a list of working devices.
         """
         return sr.Microphone.list_usable_microphones()
 
-    def isLanguageSupported(self, recognizer: str, language: str) -> bool:
+    @staticmethod
+    def isLanguageSupported(recognizer: str, language: str) -> bool:
         """
         Check if the language is supported by the recognizer.
         """

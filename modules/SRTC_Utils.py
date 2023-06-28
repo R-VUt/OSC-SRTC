@@ -10,19 +10,19 @@ default_settings = """
 {
 	"osc_ip" : "127.0.0.1",
 	"osc_port" : 9000,
-	
+
 	"osc_serv_ip" : "127.0.0.1",
 	"osc_serv_port" : 9001,
     "extension_port" : 9002,
 
     "mic_vad_thresold" : 300,
-    "mic_min_record_time" : 1.0, 
-	
+    "mic_min_record_time" : 1.0,
+
 	"azure_key" : "",
 	"azure_location" : "",
-	
+
 	"etri_key" : "",
-	
+
 	"papago_id" : "",
 	"papago_secret" : ""
 }

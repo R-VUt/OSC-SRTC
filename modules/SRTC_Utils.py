@@ -31,11 +31,13 @@ default_settings = """
 
 
 def make_default_settings():
+    """Make default settings file"""
     with open("./api_settings.json", "w") as f:
         f.write(default_settings)
 
 
 def resource_path(relative_path: str) -> str:
+    """Get absolute path to resource, works for dev and for PyInstaller"""
     try:
         base_path = sys._MEIPASS
     except Exception:
@@ -44,6 +46,7 @@ def resource_path(relative_path: str) -> str:
 
 
 def load_settings() -> dict:
+    """Load settings from api_settings.json"""
     settings = {}
     if not os.path.exists("./api_settings.json"):
         make_default_settings()
@@ -57,10 +60,12 @@ def load_settings() -> dict:
 
 
 def clear_screen():
+    """ Clear console (not used)"""
     os.system("cls" if os.name == "nt" else "clear")
 
 
 def update_check(ver: int) -> None:
+    """Check for program updates"""
     try:
         url = "https://rera-c.booth.pm/items/4217922"
         res = requests.get(url)

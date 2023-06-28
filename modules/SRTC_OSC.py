@@ -19,12 +19,15 @@ class SRTC_OSC:
         )
 
     def send(self, address: str, *args):
+        """Send OSC message to the specified address"""
         self._OSC_Client.send_message(address, args)
 
     def recv_callback(self, address: str, callback: callable):
+        """Register callback function for the specified address"""
         self._disp.map(address, callback)
 
     def start_server(self):
+        """Start OSC server"""
         self._OSC_Server = (
             osc_server.ThreadingOSCUDPServer(
                 (self._OSC_Recv_IP, self._OSC_Recv_Port), self._disp

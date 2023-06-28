@@ -95,16 +95,12 @@ class SRTC_Translator:
         return -1
 
     def getRegisteredTranslators(self) -> list[str]:
-        """
-        Get a list of registered translators.
-        """
+        """Get a list of registered translators."""
         return self.__Registered_Translators
 
     @staticmethod
     def isLanguageSupported(translator: str, language: str) -> bool:
-        """
-        Check if the language is supported by the translator.
-        """
+        """Check if the language is supported by the translator."""
         if translator == "Google Translate":
             return language in Google_Supported_Languages
         if translator == "DeepL":
@@ -115,6 +111,7 @@ class SRTC_Translator:
 
     @staticmethod
     def RomajiConvert(text: str) -> str:
+        """Convert the Japanese text to romaji."""
         converter = kakasi()
 
         tmp = ""
@@ -125,9 +122,7 @@ class SRTC_Translator:
     def Translate(
         self, translator: str, text: str, source_language: str, target_language: str
     ) -> str | int:
-        """
-        Translate the text using the translator.
-        """
+        """Translate the text using the translator."""
         if translator == "Google Translate":
             tr = Translator()
             return tr.translate(

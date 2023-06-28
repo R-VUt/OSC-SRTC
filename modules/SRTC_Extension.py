@@ -154,6 +154,7 @@ class SRTC_Extension:
         return "Not found extension", 404
 
     def execute_extension(self, message: str):
+        """Send message to all extensions and return result."""
         self.__extension_list_lock.acquire()
         extension_len = len(self.__extension_list)
 
@@ -181,6 +182,7 @@ class SRTC_Extension:
         return execute_result
 
     def start_server(self):
+        """Start extension server."""
         threading.Thread(target=self.__heartbeat_check).start()
         # threaded
         t1 = threading.Thread(

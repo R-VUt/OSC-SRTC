@@ -6,16 +6,20 @@ from modules.SRTC_Utils import resource_path
 
 class SRTC_GUI(ctk.CTk):
     def get_property_value(self, key: str):
+        """Get the value of the specified property"""
         return self._properties[key].get()
 
     def set_property_value(self, key: str, value):
+        """Set the value of the specified property"""
         self._properties[key].set(value)
 
     def set_listbox_list(self, key: str, change: list):
+        """Set the list of the specified listbox"""
         self._properties[key].configure(values=change)
         self._properties[key].set(list[0])
 
     def set_callback(self, key: str, callback):
+        """Set the callback function of the specified property"""
         if key == "exit":
             self.protocol("WM_DELETE_WINDOW", callback)
         elif key == "option_changed":
@@ -24,9 +28,11 @@ class SRTC_GUI(ctk.CTk):
             self._properties[key].configure(command=callback)
 
     def set_ui_state(self, key: str, state: str):
+        """Set the state of the specified property"""
         self._properties[key].configure(state=state)
 
     def set_ui_text(self, key: str, text: str):
+        """Set the text of the specified property"""
         self._properties[key].configure(text=text)
 
     def _option_changed(self, *args):
@@ -34,6 +40,7 @@ class SRTC_GUI(ctk.CTk):
             self._properties["option_changed_callback"]()
 
     def print_log(self, text):
+        """Print the log to the log textbox"""
         if self._log_textbox is None:
             self._log_temp += text + "\n"
         else:
@@ -47,6 +54,7 @@ class SRTC_GUI(ctk.CTk):
             self._log_textbox.configure(state="disabled")
 
     def clear_log(self):
+        """Clear the log textbox"""
         self._log_textbox.configure(state="normal")
         self._log_textbox.delete("1.0", "end")
         self._log_textbox.configure(state="disabled")

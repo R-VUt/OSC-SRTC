@@ -1,5 +1,6 @@
 import threading
 import time
+import os
 import sys
 
 from modules.SRTC_Utils import load_settings, update_check

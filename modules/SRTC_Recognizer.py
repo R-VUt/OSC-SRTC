@@ -104,30 +104,22 @@ class SRTC_Recognizer:
         self.__speech_recognition = sr.Recognizer()
 
     def getRegisteredRecognizers(self) -> list[str]:
-        """
-        Get a list of registered recognizers.
-        """
+        """Get a list of registered recognizers."""
         return self.__Registered_Recognizers
 
     @staticmethod
     def getDevices() -> list[str]:
-        """
-        Get a list of devices.
-        """
+        """Get a list of devices."""
         return sr.Microphone.list_microphone_names()
 
     @staticmethod
     def getUsableDevices() -> list[str]:
-        """
-        Get a list of working devices.
-        """
+        """Get a list of working devices."""
         return sr.Microphone.list_usable_microphones()
 
     @staticmethod
     def isLanguageSupported(recognizer: str, language: str) -> bool:
-        """
-        Check if the language is supported by the recognizer.
-        """
+        """Check if the language is supported by the recognizer."""
         if recognizer == "Google WebSpeech":
             return language in Google_Supported_Languages
         if recognizer == "Azure Speech":
@@ -137,9 +129,7 @@ class SRTC_Recognizer:
         return False
 
     def Recognize(self, recognizer: str, language: str, audio: sr.AudioData) -> str:
-        """
-        Recognize the audio data.
-        """
+        """Recognize the audio data."""
         if recognizer == "Google WebSpeech":
             return self.__speech_recognition.recognize_google(
                 audio, language=Google_Supported_Languages[language]
@@ -168,6 +158,7 @@ class SRTC_Recognizer:
         vad_threshold: int = 300,
         min_record_time: float = 1.0,
     ) -> str:
+        """Listen and recognize the audio data."""
         CHUNK = 1024
         FORMAT = pyaudio.paInt16
         CHANNELS = 1

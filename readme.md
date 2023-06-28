@@ -16,11 +16,11 @@ The OSC-SRTC project is an open source project that combines VRChat's OSC Chatbo
 
 To install this project, you can download the built executable file or download the source code and run it directly.
 
-* Built executable file
+*  Built executable file
 
 You can download the latest release from [here](https://github.com/rera-vrc/OSC-SRTC/releases)
 
-* Running from source
+*  Running from source
 
 ```bash
   pip install -r requirements.txt

@@ -2,7 +2,6 @@
   <img src="https://github.com/rera-vrc/OSC-SRTC/blob/main/imgs/Dark-Logo.png?raw=true#gh-dark-mode-only" height="200" width="700">
   <img src="https://github.com/rera-vrc/OSC-SRTC/blob/main/imgs/Light-Logo.png?raw=true#gh-light-mode-only" height="200" width="700">
   </br>
-
 </p>
 
 # OSC-SRTC [![build](https://github.com/rera-vrc/OSC-SRTC/actions/workflows/release.yaml/badge.svg)](https://github.com/rera-vrc/OSC-SRTC/actions/workflows/release.yaml)
@@ -13,11 +12,11 @@ OSC-SRTC 프로젝트는 VRChat의 OSC Chatbox API와 음성 인식 및 번역 A
 
 이 프로젝트를 설치하려면 빌드된 실행 파일을 다운로드하거나, 소스 코드를 다운로드하여 직접 실행할 수 있습니다.
 
-* 빌드된 실행파일
+*  빌드된 실행파일
 
 [여기](https://github.com/rera-vrc/OSC-SRTC/releases)에서 최신 릴리즈를 다운로드할 수 있습니다.
 
-* 소스에서 실행하기
+*  소스에서 실행하기
 
 ```bash
   pip install -r requirements.txt

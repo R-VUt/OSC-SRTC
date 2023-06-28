@@ -1,6 +1,7 @@
 import threading
 import time
 
+import pyi_splash
 from modules.SRTC_Utils import *
 from modules.SRTC_GUI import SRTC_GUI
 from modules.SRTC_Recognizer import SRTC_Recognizer
@@ -82,6 +83,7 @@ def initialize():
   Extension.start_server()
   OSC.start_server()
 
+  pyi_splash.close()
   GUI.mainloop()
   
 def main_thread():

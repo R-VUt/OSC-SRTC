@@ -1,3 +1,4 @@
+import json
 from googletrans import Translator
 import deepl
 import urllib

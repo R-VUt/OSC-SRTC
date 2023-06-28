@@ -127,12 +127,11 @@ class SRTC_Recognizer:
         """
         if recognizer == "Google WebSpeech":
             return language in Google_Supported_Languages
-        elif recognizer == "Azure Speech":
+        if recognizer == "Azure Speech":
             return language in Azure_Supported_Languages
-        elif recognizer == "ETRI Speech":
+        if recognizer == "ETRI Speech":
             return language in ETRI_Supported_Languages
-        else:
-            return False
+        return False
 
     def Recognize(self, recognizer: str, language: str, audio: sr.AudioData) -> str:
         """
@@ -142,19 +141,18 @@ class SRTC_Recognizer:
             return self.__speech_recognition.recognize_google(
                 audio, language=Google_Supported_Languages[language]
             )
-        elif recognizer == "Azure Speech":
+        if recognizer == "Azure Speech":
             return self.__speech_recognition.recognize_azure(
                 audio,
                 key=self.__azure_key,
                 language=Azure_Supported_Languages[language],
                 region=self.__azure_location,
             )
-        elif recognizer == "ETRI Speech":
+        if recognizer == "ETRI Speech":
             return self.__speech_recognition.recognize_etri(
                 audio, self.__etri_key, ETRI_Supported_Languages[language]
             )
-        else:
-            return ""
+        return ""
 
     def ListenAndRecognize(
         self,

@@ -8,7 +8,7 @@ from modules.SRTC_Translator import SRTC_Translator
 from modules.SRTC_Extension import SRTC_Extension
 from modules.SRTC_OSC import SRTC_OSC
 
-#sys.stdout = sys.stderr = open(os.devnull, 'w') # noconsole fix
+sys.stdout = sys.stderr = open(os.devnull, 'w') # noconsole fix
 
 Supported_Languages: list[str] = ["English", "Korean", "Japanese", "Chinese (simplified)", "Chinese (traditional)",
                        "French", "Spanish", "Italian", "Russian", "Ukrainian", "German", "Arabic", "Thai",
@@ -94,6 +94,10 @@ def main_thread():
   #clear_screen()
   GUI.clear_log()
   GUI.print_log("[Info] Main thread started.")
+  
+  tmp = GUI.get_property_value("mic_option")
+  GUI.set_listbox_list("mic_option", Recognizer.getUsableDevices())
+  GUI.set_property_value("mic_option", tmp)
 
   while not Stop_Event.is_set():
     try:
@@ -180,6 +184,7 @@ def stop_main_thread():
   Stop_Event.set()
   OSC.send("/avatar/parameters/SRTC/OnOff", False)
   GUI.print_log('[Info] Stopppping...')
+  
 
 def on_closing():
   Stop_Event.set()

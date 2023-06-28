@@ -297,8 +297,6 @@ def OSC_SetSource(*data):
 
 def OSC_SetOnOff(*data):
     (link, on_off) = data
-
-    global is_running
     if on_off:
         if not is_running:
             start_main_thread()
@@ -317,8 +315,6 @@ def OSC_SetPTT(*data):
 
 def OSC_PTTButton(*data):
     (link, ptt) = data
-
-    global PTT_End
     if ptt:
         GUI.print_log("[INFO] PTT Start")
         PTT_End.clear()

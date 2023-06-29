@@ -1,0 +1,53 @@
+{
+  "ja" : {
+    "main_initialize" : "OSC-SRTCを初期化しています...",
+    "main_start_thread" : "OSC-SRTCのメインスレッドを起動しています...",
+    "main_recognized" : "認識完了 : %{text}",
+    "main_start_translate" : "出力言語 %{phase} に翻訳しています...",
+    "main_end_translate" : "翻訳完了 : %{text}",
+    "main_execute_extension" : "拡張機能を実行しています...",
+    "main_thread_error" : "音声認識の途中でエラーが発生しました...",
+    "main_stop_thread" : "OSC-SRTCスレッドを停止しています...",
+    "main_start_ptt" : "Push-To-Talkスタート。",
+    "main_end_ptt" : "Push-To-Talk終了。",
+
+    "recognizer_language_not_supported" : "言語 %{language} は選択された音声認識器でサポートされていません。",
+    "translator_language_not_supported" : "言語 %{language} は選択された翻訳器でサポートされていません。",
+
+    "recognizer_init" : "音声認識モジュールを初期化しています...",
+    "recognizer_init_api" : "音声認識API %{api} を正常に登録しました。",
+    "listener_ready" : "マイクの準備ができました。",
+    "listener_started" : "聞いてます...",
+    "listener_success" : "録音が完了しました。",
+    "listener_stopped" : "録音が停止しました。",
+    "listener_stop_requested" : "マイクの停止が要求されました。",
+    "recognizer_unknown_value_error" : "音声認識中にエラーが発生しました：不明な値です。",
+    "recognizer_request_error" : "音声認識中にエラーが発生しました：APIリクエストエラー。",
+
+    "translator_init" : "翻訳モジュールを初期化しています...",
+    "translator_init_api" : "翻訳API %{api} を正常に登録しました。",
+
+    "osc_init" : "OSCモジュールを初期化しています...",
+
+    "extension_init" : "エクステンションモジュールを初期化しています...",
+    "extension_register" : "エクステンション %{name} を登録しています...",
+    "extension_forward" : "エクステンション %{name} を前方に移動させています...",
+    "extension_backward" : "エクステンション %{name} を後方に移動させています...",
+    "extension_test" : "エクステンション %{name} をテストしています...",
+    "extension_heartbeat_fail" : "エクステンション %{name} のハートビートが失敗しました。",
+    "extension_server_not_respond" : "エクステンション %{name} のサーバーが応答しません。",
+
+    "gui_microphone" : "マイク",
+    "gui_recognizer" : "音声認識器",
+    "gui_translator" : "翻訳器",
+    "gui_source_language" : "入力言語",
+    "gui_target_language" : "出力言語",
+    "gui_target2_language" : "出力言語2",
+    "gui_romaji_mode" : "ローマ字モード (日本語のみ）",
+    "gui_start_button" : "start",
+    "gui_stop_button" : "stop",
+    "gui_ui_language" : "UI言語",
+
+    "update_check_msg" : "新バージョンのOSC-SRTCがあります。ブースのページをご覧いただけますか？"
+  }
+}

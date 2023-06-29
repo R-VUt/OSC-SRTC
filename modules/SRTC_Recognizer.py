@@ -81,7 +81,7 @@ class SRTC_Recognizer:
             "Google WebSpeech"
         ]  # now supports Google, Azure, ETRI
         self.__print_log = log
-        self.__print_log("[Recognizer][Info] Initializing Speech Recognition...")
+        self.__print_log("INFO:R", "recognizer_init")
         self.__beep_sound = sa.WaveObject.from_wave_file(
             resource_path("resources\\1.wav").replace("\\", "/")
         )
@@ -92,13 +92,15 @@ class SRTC_Recognizer:
             self.__azure_key = settings.get("azure_key")
             self.__azure_location = settings.get("azure_location")
             self.__print_log(
-                "[Recognizer][Info] Azure Speech Cognitive API is enabled."
+                "INFO:R", "recognizer_init_api", api="Azure Speech"
             )
 
         if settings.get("etri_key"):
             self.__Registered_Recognizers.append("ETRI Speech")
             self.__etri_key = settings.get("etri_key")
-            self._print_log("[Recognizer][Info] ETRI API is enabled.")
+            self._print_log(
+                "INFO:R", "recognizer_init_api", api="ETRI Speech"
+            )
         # ----------------------------------------------
 
         self.__speech_recognition = sr.Recognizer()
@@ -178,7 +180,7 @@ class SRTC_Recognizer:
 
         self.__beep_sound.play()
 
-        self.__print_log("[Recognizer][Info] Listener is ready.")
+        self.__print_log("INFO:R", "listener_ready")
 
         while not stop_event.is_set():
             audio_data = stream.read(CHUNK)
@@ -190,10 +192,10 @@ class SRTC_Recognizer:
                 if is_ptt:
                     while ptt_event.is_set():
                         if stop_event.is_set():
-                            print("[Recognizer][Info] Stopped Listening.")
+                            self.__print_log("INFO:R", "listener_stop_requested")
                             return ""
                         time.sleep(0.1)
-                self.__print_log("[Recognizer][Info] Listening...")
+                self.__print_log("INFO:R", "listener_started")
 
                 audio_buffer = [audio_data]
                 vad_below_threshold = 0
@@ -212,22 +214,22 @@ class SRTC_Recognizer:
                 audio_data = b"".join(audio_buffer)
                 audio = sr.AudioData(audio_data, RATE, 2)
 
-                self.__print_log("[Recognizer][Info] Recognizing...")
+                self.__print_log("INFO:R", "listener_success")
                 try:
                     return self.Recognize(recognizer, language, audio)
                 except sr.UnknownValueError:
                     self.__print_log(
-                        "[Recognizer][Error] Unknown Value, recognizer couldn't understand the audio."
+                        "ERROR", "recognizer_unknown_value_error",
                     )
                 except sr.RequestError as e:
                     self.__print_log(
-                        "[Recognizer][Error] Request Error : " + e.with_traceback()
+                        "ERROR", "recognizer_request_error",
                     )
 
             else:
                 continue
-        if stop_event.is_set():
-            self.__print_log("[Recognizer][Info] Stopped Listening.")
+        
+        self.__print_log("INFO:R", "listener_stopped")
 
         stream.stop_stream()
         stream.close()

@@ -1,8 +1,9 @@
 import customtkinter as ctk
 from PIL import Image
+import i18n
 
 from modules.SRTC_Utils import resource_path
-
+from modules.SRTC_Localize import SUPPORTED_UI_LANGUAGES, get_saved_language, save_language
 
 class SRTC_GUI(ctk.CTk):
     def get_property_value(self, key: str):
@@ -39,17 +40,38 @@ class SRTC_GUI(ctk.CTk):
         if "option_changed_callback" in self._properties:
             self._properties["option_changed_callback"]()
 
-    def print_log(self, text):
+    def _option_changed_ui_language(self, *args):
+        print("[Stelth] UI Language Changed")
+        save_language(self._UI_Language_Selection.get())
+        i18n.set("locale", SUPPORTED_UI_LANGUAGES[self._UI_Language_Selection.get()])
+
+        self._mic_label.configure(text=i18n.t("gui_microphone"))
+        self._speech_label.configure(text=i18n.t("gui_recognizer"))
+        self._translator_label.configure(text=i18n.t("gui_translator"))
+        self._ui_language_label.configure(text=i18n.t("gui_ui_language"))
+        self._source_label.configure(text=i18n.t("gui_source_language"))
+        self._target_label.configure(text=i18n.t("gui_target_language"))
+        self._target2_label.configure(text=i18n.t("gui_target2_language"))
+        self._Romaji_Mode_Checkbox.configure(text=i18n.t("gui_romaji_mode"))
+        if self._Button_Start._text == i18n.t("gui_start_button"):
+            self._Button_Start.configure(text=i18n.t("gui_stop_button"))
+        else:
+            self._Button_Start.configure(text=i18n.t("gui_start_button"))
+        self._option_changed()
+
+        
+
+    def print_log(self, type: str, i18n_key: str, **kwargs):
         """Print the log to the log textbox"""
         if self._log_textbox is None:
-            self._log_temp += text + "\n"
+            self._log_temp += "["+type+"] " + i18n.t(i18n_key, kwargs=kwargs) + "\n"
         else:
             self._log_textbox.configure(state="normal")
             if not self._log_temp_printed:
                 self._log_textbox.insert("end", self._log_temp)
                 self._log_temp_printed = True
 
-            self._log_textbox.insert("end", text + "\n")
+            self._log_textbox.insert("end", "["+type+"] " + i18n.t(i18n_key, kwargs=kwargs) + "\n")
             self._log_textbox.see("end")
             self._log_textbox.configure(state="disabled")
 
@@ -93,7 +115,7 @@ class SRTC_GUI(ctk.CTk):
         self._settings_tab.add("output")
 
         self._mic_label = ctk.CTkLabel(
-            self._settings_tab.tab("system"), text="Microphone", height=25
+            self._settings_tab.tab("system"), text=i18n.t("gui_microphone"), height=25
         )
         self._Device_Selection = ctk.CTkOptionMenu(
             self._settings_tab.tab("system"),
@@ -103,7 +125,7 @@ class SRTC_GUI(ctk.CTk):
             height=25,
         )
         self._speech_label = ctk.CTkLabel(
-            self._settings_tab.tab("system"), text="Speech Recognition", height=25
+            self._settings_tab.tab("system"), text=i18n.t("gui_recognizer"), height=25
         )
         self._Recognizer_Selection = ctk.CTkOptionMenu(
             self._settings_tab.tab("system"),
@@ -113,7 +135,7 @@ class SRTC_GUI(ctk.CTk):
             height=25,
         )
         self._translator_label = ctk.CTkLabel(
-            self._settings_tab.tab("system"), text="Translator", height=25
+            self._settings_tab.tab("system"), text=i18n.t("gui_translator"), height=25
         )
         self._Translator_Selection = ctk.CTkOptionMenu(
             self._settings_tab.tab("system"),
@@ -122,8 +144,20 @@ class SRTC_GUI(ctk.CTk):
             dynamic_resizing=False,
             height=25,
         )
+        self._ui_language_label = ctk.CTkLabel(
+            self._settings_tab.tab("system"), text=i18n.t("gui_ui_language"), height=25
+        )
+        self._UI_Language_Selection = ctk.CTkOptionMenu(
+            self._settings_tab.tab("system"),
+            values=list(SUPPORTED_UI_LANGUAGES),
+            width=150,
+            command=self._option_changed_ui_language,
+            dynamic_resizing=False,
+            height=25,
+        )
+        self._UI_Language_Selection.set(get_saved_language())
         self._source_label = ctk.CTkLabel(
-            self._settings_tab.tab("output"), text="Source", height=25
+            self._settings_tab.tab("output"), text=i18n.t("gui_source_language"), height=25
         )
         self._Source_Selection = ctk.CTkOptionMenu(
             self._settings_tab.tab("output"),
@@ -133,7 +167,7 @@ class SRTC_GUI(ctk.CTk):
             height=25,
         )
         self._target_label = ctk.CTkLabel(
-            self._settings_tab.tab("output"), text="Target", height=25
+            self._settings_tab.tab("output"), text=i18n.t("gui_target_language"), height=25
         )
         self._Target_Selection = ctk.CTkOptionMenu(
             self._settings_tab.tab("output"),
@@ -143,7 +177,7 @@ class SRTC_GUI(ctk.CTk):
             height=25,
         )
         self._target2_label = ctk.CTkLabel(
-            self._settings_tab.tab("output"), text="Target2", height=25
+            self._settings_tab.tab("output"), text=i18n.t("gui_target2_language"), height=25
         )
         self._Target2_Selection = ctk.CTkOptionMenu(
             self._settings_tab.tab("output"),
@@ -156,12 +190,12 @@ class SRTC_GUI(ctk.CTk):
         self._Romaji_Mode.set(0)
         self._Romaji_Mode_Checkbox = ctk.CTkCheckBox(
             self._settings_tab.tab("output"),
-            text="Romaji Mode",
+            text=i18n.t("gui_romaji_mode"),
             variable=self._Romaji_Mode,
             command=self._option_changed,
             height=25,
         )
-        self._Button_Start = ctk.CTkButton(self._navigation_frame, text="Start")
+        self._Button_Start = ctk.CTkButton(self._navigation_frame, text=i18n.t("gui_start_button"))
 
         self._properties["version_label"] = self._navigation_frame_label
         self._properties["mic_option"] = self._Device_Selection
@@ -192,9 +226,6 @@ class SRTC_GUI(ctk.CTk):
 
         self._settings_tab.pack(expand=True, fill="both")
 
-        dummy_label = ctk.CTkLabel(self._settings_tab.tab("system"), text="", height=1)
-        dummy_label.pack()
-
         self._speech_label.pack()
         self._Recognizer_Selection.pack()
 
@@ -203,6 +234,9 @@ class SRTC_GUI(ctk.CTk):
 
         self._mic_label.pack()
         self._Device_Selection.pack()
+
+        self._ui_language_label.pack()
+        self._UI_Language_Selection.pack()
 
         self._source_label.pack()
         self._Source_Selection.pack()

@@ -2,6 +2,7 @@ import sys
 import os
 import json
 import webbrowser
+import i18n
 
 import requests
 from bs4 import BeautifulSoup
@@ -58,6 +59,26 @@ def load_settings() -> dict:
         return {}
     return settings
 
+def load_internal_settings() -> dict:
+    """Load settings from internal_settings.json"""
+    settings = {}
+    if not os.path.exists("./internal_settings.json"):
+        make_default_settings()
+
+    try:
+        with open("./internal_settings.json", "r") as f:
+            settings = json.load(f)
+    except Exception:
+        return {}
+    return settings
+
+def save_internal_settings(settings: dict) -> None:
+    """Save settings to internal_settings.json"""
+    try:
+        with open("./internal_settings.json", "w") as f:
+            json.dump(settings, f, indent=4)
+    except Exception:
+        return
 
 def clear_screen():
     """Clear console (not used)"""
@@ -81,7 +102,7 @@ def update_check(ver: int) -> None:
                     if int(version) > ver:
                         msg = CTkMessagebox(
                             title="OSC-SRTC",
-                            message="New update found! \nDo you want to check the booth page?",
+                            message=i18n.t("update_check_msg"),
                             option_1="No",
                             option_2="Yes",
                             icon="question",

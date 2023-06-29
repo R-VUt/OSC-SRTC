@@ -2,15 +2,17 @@ import threading
 import time
 import os
 import sys
+import i18n
 
-from modules.SRTC_Utils import load_settings, update_check
+from modules.SRTC_Localize import get_saved_language, SUPPORTED_UI_LANGUAGES
+from modules.SRTC_Utils import load_settings, update_check, resource_path
 from modules.SRTC_GUI import SRTC_GUI
 from modules.SRTC_Recognizer import SRTC_Recognizer
 from modules.SRTC_Translator import SRTC_Translator
 from modules.SRTC_Extension import SRTC_Extension
 from modules.SRTC_OSC import SRTC_OSC
 
-sys.stdout = sys.stderr = open(os.devnull, "w")  # noconsole fix
+#sys.stdout = sys.stderr = open(os.devnull, "w")  # noconsole fix
 
 Supported_Languages: list[str] = [
     "English",
@@ -57,7 +59,6 @@ Stop_Event: threading.Event = threading.Event()
 PTT_End = threading.Event()
 PTT_End.set()
 
-
 def initialize():
     global GUI
     global Recognizer
@@ -68,10 +69,17 @@ def initialize():
     global mic_vad_thresold
     global mic_min_record_time
 
+    i18n.load_path.append(resource_path("resources\\localize"))
+    i18n.set("filename_format", "{locale}.{format}")
+    i18n.set("fallback", "en")
+    i18n.set("locale", SUPPORTED_UI_LANGUAGES[get_saved_language()])
+    i18n.set("file_format", "json")
+    i18n.set("enable_memoization", True)
+
     GUI = SRTC_GUI()
     update_check(version_RCUPD)
-
-    GUI.print_log("Initializing...")
+    
+    GUI.print_log("INFO", "main_initialize")
 
     settings = load_settings()
     if settings.get("mic_vad_thresold"):
@@ -116,7 +124,7 @@ def initialize():
 
 def main_thread():
     GUI.clear_log()
-    GUI.print_log("[Info] Main thread started.")
+    GUI.print_log("INFO", "main_start_thread")
 
     tmp = GUI.get_property_value("mic_option")
     GUI.set_listbox_list("mic_option", Recognizer.getUsableDevices())
@@ -145,10 +153,11 @@ def main_thread():
             to_send_message = ""
 
             if recognized != "":
-                GUI.print_log("[Info] Recognized: " + recognized)
+                GUI.print_log("INFO", "main_recognized", text = recognized)
 
                 if source_lang != target_lang:
-                    GUI.print_log("[Info] Translating to Target 1...")
+                    GUI.print_log("INFO", "main_start_translate", phase = 1)
+
                     translated = Translator.Translate(
                         translator, recognized, source_lang, target_lang
                     )
@@ -157,12 +166,13 @@ def main_thread():
 
                 if target_lang == "Japanese" and romaji_mode == 1:
                     translated = Translator.RomajiConvert(translated)
-                GUI.print_log("[Info] Translated to Target 1: " + translated)
+                if translated != recognized:
+                    GUI.print_log("INFO", "main_end_translate", text = translated)
                 to_send_message += translated
 
                 if target2_lang != "None":
                     if source_lang != target2_lang:
-                        GUI.print_log("[Info] Translating to Target 2...")
+                        GUI.print_log("INFO", "main_start_translate", phase = 2)
                         translated = Translator.Translate(
                             translator, recognized, source_lang, target2_lang
                         )
@@ -171,18 +181,18 @@ def main_thread():
 
                     if target2_lang == "Japanese" and romaji_mode == 1:
                         translated = Translator.RomajiConvert(translated)
-                    GUI.print_log("[Info] Translated to Target 2: " + translated)
+                    GUI.print_log("INFO", "main_end_translate", text = translated)
                     to_send_message += " (" + translated + ")"
 
                 if to_send_message != "":
-                    GUI.print_log("[Info] Executing extension...")
+                    GUI.print_log("INFO", "main_execute_extension")
                     to_send_message = Extension.execute_extension(to_send_message)
-                    GUI.print_log("[Info] Sending message: " + to_send_message)
+                    GUI.print_log("INFO", "main_start_sending", text = to_send_message)
                     GUI.print_log(" ")
                     if to_send_message != "{Sended-Already}":
                         OSC.send("/chatbox/input", [to_send_message, True])
         except Exception:
-            GUI.print_log("[Error] Could not recognize or translate.")
+            GUI.print_log("ERR", "main_thread_error")
 
 
 def start_main_thread():
@@ -190,7 +200,7 @@ def start_main_thread():
 
     is_running = True
 
-    GUI.set_ui_text("start_button", "Stop")
+    GUI.set_ui_text("start_button", i18n.t("gui_stop_button"))
     GUI.set_callback("start_button", stop_main_thread)
 
     Stop_Event.clear()
@@ -211,12 +221,12 @@ def stop_main_thread():
     global is_running
     is_running = False
 
-    GUI.set_ui_text("start_button", "Start")
+    GUI.set_ui_text("start_button", i18n.t("gui_start_button"))
     GUI.set_callback("start_button", start_main_thread)
 
     Stop_Event.set()
     OSC.send("/avatar/parameters/SRTC/OnOff", False)
-    GUI.print_log("[Info] Stopppping...")
+    GUI.print_log("INFO", "main_stop_thread")
 
 
 def on_closing():
@@ -237,11 +247,9 @@ def option_changed(*args):
 
     if not Recognizer.isLanguageSupported(selected_recognizer, source_lang):
         GUI.print_log(
-            "[Error] This recognizer "
-            + selected_recognizer
-            + " does not support "
-            + source_lang
-            + " language."
+            "ERROR",
+            "recognizer_language_not_supported",
+            lang = source_lang
         )
         GUI.set_property_value(
             "recognizer_option", Recognizer.getRegisteredRecognizers()[0]
@@ -249,7 +257,9 @@ def option_changed(*args):
 
     if not Translator.isLanguageSupported(selected_translator, source_lang):
         GUI.print_log(
-            "[Error] This translator does not support " + source_lang + " language."
+            "ERROR",
+            "translator_language_not_supported",
+            lang = source_lang
         )
         GUI.set_property_value(
             "translator_option", Translator.getRegisteredTranslators()[0]
@@ -257,7 +267,9 @@ def option_changed(*args):
 
     if not Translator.isLanguageSupported(selected_translator, target_lang):
         GUI.print_log(
-            "[Error] This translator does not support " + target_lang + " language."
+            "ERROR",
+            "translator_language_not_supported",
+            lang = target_lang
         )
         GUI.set_property_value(
             "translator_option", Translator.getRegisteredTranslators()[0]
@@ -267,7 +279,9 @@ def option_changed(*args):
         selected_translator, target2_lang
     ):
         GUI.print_log(
-            "[Error] This translator does not support " + target2_lang + " language."
+            "ERROR",
+            "translator_language_not_supported",
+            lang = target2_lang
         )
         GUI.set_property_value(
             "translator_option", Translator.getRegisteredTranslators()[0]
@@ -317,10 +331,10 @@ def OSC_SetPTT(*data):
 def OSC_PTTButton(*data):
     (_, ptt) = data
     if ptt:
-        GUI.print_log("[INFO] PTT Start")
+        GUI.print_log("INFO", "main_start_ptt")
         PTT_End.clear()
     else:
-        GUI.print_log("[INFO] PTT End")
+        GUI.print_log("INFO", "main_end_ptt")
         PTT_End.set()
 
 

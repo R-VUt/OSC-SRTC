@@ -12,7 +12,7 @@ from modules.SRTC_Translator import SRTC_Translator
 from modules.SRTC_Extension import SRTC_Extension
 from modules.SRTC_OSC import SRTC_OSC
 
-#sys.stdout = sys.stderr = open(os.devnull, "w")  # noconsole fix
+# sys.stdout = sys.stderr = open(os.devnull, "w")  # noconsole fix
 
 Supported_Languages: list[str] = [
     "English",
@@ -59,6 +59,7 @@ Stop_Event: threading.Event = threading.Event()
 PTT_End = threading.Event()
 PTT_End.set()
 
+
 def initialize():
     global GUI
     global Recognizer
@@ -78,7 +79,7 @@ def initialize():
 
     GUI = SRTC_GUI()
     update_check(version_RCUPD)
-    
+
     GUI.print_log("INFO", "main_initialize")
 
     settings = load_settings()
@@ -153,10 +154,10 @@ def main_thread():
             to_send_message = ""
 
             if recognized != "":
-                GUI.print_log("INFO", "main_recognized", text = recognized)
+                GUI.print_log("INFO", "main_recognized", text=recognized)
 
                 if source_lang != target_lang:
-                    GUI.print_log("INFO", "main_start_translate", phase = 1)
+                    GUI.print_log("INFO", "main_start_translate", phase=1)
 
                     translated = Translator.Translate(
                         translator, recognized, source_lang, target_lang
@@ -167,12 +168,12 @@ def main_thread():
                 if target_lang == "Japanese" and romaji_mode == 1:
                     translated = Translator.RomajiConvert(translated)
                 if translated != recognized:
-                    GUI.print_log("INFO", "main_end_translate", text = translated)
+                    GUI.print_log("INFO", "main_end_translate", text=translated)
                 to_send_message += translated
 
                 if target2_lang != "None":
                     if source_lang != target2_lang:
-                        GUI.print_log("INFO", "main_start_translate", phase = 2)
+                        GUI.print_log("INFO", "main_start_translate", phase=2)
                         translated = Translator.Translate(
                             translator, recognized, source_lang, target2_lang
                         )
@@ -181,13 +182,13 @@ def main_thread():
 
                     if target2_lang == "Japanese" and romaji_mode == 1:
                         translated = Translator.RomajiConvert(translated)
-                    GUI.print_log("INFO", "main_end_translate", text = translated)
+                    GUI.print_log("INFO", "main_end_translate", text=translated)
                     to_send_message += " (" + translated + ")"
 
                 if to_send_message != "":
                     GUI.print_log("INFO", "main_execute_extension")
                     to_send_message = Extension.execute_extension(to_send_message)
-                    GUI.print_log("INFO", "main_start_sending", text = to_send_message)
+                    GUI.print_log("INFO", "main_start_sending", text=to_send_message)
                     GUI.print_log(" ")
                     if to_send_message != "{Sended-Already}":
                         OSC.send("/chatbox/input", [to_send_message, True])
@@ -246,31 +247,19 @@ def option_changed(*args):
     OSC.send("/avatar/parameters/SRTC/TLang", Supported_Languages.index(target_lang))
 
     if not Recognizer.isLanguageSupported(selected_recognizer, source_lang):
-        GUI.print_log(
-            "ERROR",
-            "recognizer_language_not_supported",
-            lang = source_lang
-        )
+        GUI.print_log("ERROR", "recognizer_language_not_supported", lang=source_lang)
         GUI.set_property_value(
             "recognizer_option", Recognizer.getRegisteredRecognizers()[0]
         )
 
     if not Translator.isLanguageSupported(selected_translator, source_lang):
-        GUI.print_log(
-            "ERROR",
-            "translator_language_not_supported",
-            lang = source_lang
-        )
+        GUI.print_log("ERROR", "translator_language_not_supported", lang=source_lang)
         GUI.set_property_value(
             "translator_option", Translator.getRegisteredTranslators()[0]
         )
 
     if not Translator.isLanguageSupported(selected_translator, target_lang):
-        GUI.print_log(
-            "ERROR",
-            "translator_language_not_supported",
-            lang = target_lang
-        )
+        GUI.print_log("ERROR", "translator_language_not_supported", lang=target_lang)
         GUI.set_property_value(
             "translator_option", Translator.getRegisteredTranslators()[0]
         )
@@ -278,11 +267,7 @@ def option_changed(*args):
     if target2_lang != "None" and not Translator.isLanguageSupported(
         selected_translator, target2_lang
     ):
-        GUI.print_log(
-            "ERROR",
-            "translator_language_not_supported",
-            lang = target2_lang
-        )
+        GUI.print_log("ERROR", "translator_language_not_supported", lang=target2_lang)
         GUI.set_property_value(
             "translator_option", Translator.getRegisteredTranslators()[0]
         )

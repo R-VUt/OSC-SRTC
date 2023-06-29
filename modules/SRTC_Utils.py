@@ -59,6 +59,7 @@ def load_settings() -> dict:
         return {}
     return settings
 
+
 def load_internal_settings() -> dict:
     """Load settings from internal_settings.json"""
     settings = {}
@@ -72,6 +73,7 @@ def load_internal_settings() -> dict:
         return {}
     return settings
 
+
 def save_internal_settings(settings: dict) -> None:
     """Save settings to internal_settings.json"""
     try:
@@ -79,6 +81,7 @@ def save_internal_settings(settings: dict) -> None:
             json.dump(settings, f, indent=4)
     except Exception:
         return
+
 
 def clear_screen():
     """Clear console (not used)"""

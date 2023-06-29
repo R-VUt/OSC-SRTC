@@ -91,16 +91,12 @@ class SRTC_Recognizer:
             self.__Registered_Recognizers.append("Azure Speech")
             self.__azure_key = settings.get("azure_key")
             self.__azure_location = settings.get("azure_location")
-            self.__print_log(
-                "INFO:R", "recognizer_init_api", api="Azure Speech"
-            )
+            self.__print_log("INFO:R", "recognizer_init_api", api="Azure Speech")
 
         if settings.get("etri_key"):
             self.__Registered_Recognizers.append("ETRI Speech")
             self.__etri_key = settings.get("etri_key")
-            self._print_log(
-                "INFO:R", "recognizer_init_api", api="ETRI Speech"
-            )
+            self._print_log("INFO:R", "recognizer_init_api", api="ETRI Speech")
         # ----------------------------------------------
 
         self.__speech_recognition = sr.Recognizer()
@@ -219,16 +215,18 @@ class SRTC_Recognizer:
                     return self.Recognize(recognizer, language, audio)
                 except sr.UnknownValueError:
                     self.__print_log(
-                        "ERROR", "recognizer_unknown_value_error",
+                        "ERROR",
+                        "recognizer_unknown_value_error",
                     )
                 except sr.RequestError as e:
                     self.__print_log(
-                        "ERROR", "recognizer_request_error",
+                        "ERROR",
+                        "recognizer_request_error",
                     )
 
             else:
                 continue
-        
+
         self.__print_log("INFO:R", "listener_stopped")
 
         stream.stop_stream()

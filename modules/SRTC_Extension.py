@@ -54,7 +54,7 @@ class SRTC_Extension:
                     self.__log(
                         "INFO:E",
                         "extension_heartbeat_fail",
-                        name = self.__extension_list[i]['name']
+                        name=self.__extension_list[i]["name"],
                     )
                     del self.__extension_list[i]
                 else:

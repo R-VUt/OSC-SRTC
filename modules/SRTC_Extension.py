@@ -52,7 +52,9 @@ class SRTC_Extension:
             finally:
                 if self.__extension_list[i]["heartbeat-fail"] >= 2:
                     self.__log(
-                        f"[Extension] {self.__extension_list[i]['name']} heartbeat failed. Removing extension."
+                        "INFO:E",
+                        "extension_heartbeat_fail",
+                        name=self.__extension_list[i]["name"],
                     )
                     del self.__extension_list[i]
                 else:
@@ -71,7 +73,7 @@ class SRTC_Extension:
         self.__extension_list_lock = threading.Lock()
         self.__log = log
 
-        self.__log("[Extension][Info] Initializing extension server...")
+        self.__log("INFO:E", "extension_init")
 
         self.__server = Flask(__name__)
 
@@ -90,7 +92,7 @@ class SRTC_Extension:
 
     def __extension_test(self):
         msg = request.args.get("message")
-        self.__log(f"[Extension] testing [{msg}]")
+        self.__log("INFO:E", "extension_test", message=msg)
         msg = self.execute_extension(msg)
         return msg
 
@@ -98,14 +100,14 @@ class SRTC_Extension:
         name = request.args.get("name")
         ip = request.args.get("ip")
         port = request.args.get("port")
-        self.__log(f"[Extension] {name} registering. [{ip}:{port}]")
+        self.__log("INFO:E", "extension_register", name=name)
 
         self.__extension_list_lock.acquire()
 
-        for i in range(len(self.__extension_list)):
-            if self.__extension_list[i]["name"] == name:
-                self.__extension_list[i]["ip"] = ip
-                self.__extension_list[i]["port"] = port
+        for i, item in enumerate(self.__extension_list):
+            if item["name"] == name:
+                item["ip"] = ip
+                item["port"] = port
                 self.__extension_list_lock.release()
                 return str(i)
 
@@ -117,7 +119,7 @@ class SRTC_Extension:
 
     def __forward_extension(self):
         name = request.args.get("name")
-        self.__log(f"[Extension] {name} moving forward.")
+        self.__log("INFO:E", "extension_forward", name=name)
 
         self.__extension_list_lock.acquire()
         for i in range(len(self.__extension_list)):
@@ -136,7 +138,7 @@ class SRTC_Extension:
 
     def __backward_extension(self):
         name = request.args.get("name")
-        self.__log(f"[Extension] {name} moving backward.")
+        self.__log("INFO:E", "extension_backward", name=name)
 
         self.__extension_list_lock.acquire()
         for i in range(len(self.__extension_list)):
@@ -173,10 +175,14 @@ class SRTC_Extension:
 
                 else:
                     # 익스텐션 서버가 응답하지 않는다면 제거
+                    self.__log("ERR:E", "extension_server_not_respond")
                     del self.__extension_list[i]
                     extension_len -= 1
             except Exception:
-                pass
+                # 익스텐션 서버가 응답하지 않는다면 제거
+                self.__log("ERR:E", "extension_server_not_respond")
+                del self.__extension_list[i]
+                extension_len -= 1
 
         self.__extension_list_lock.release()
         return execute_result

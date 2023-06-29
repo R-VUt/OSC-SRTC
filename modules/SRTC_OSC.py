@@ -9,7 +9,7 @@ class SRTC_OSC:
         self._OSC_Recv_IP = settings.get("osc_serv_ip") or "127.0.0.1"
         self._OSC_Recv_Port = settings.get("osc_serv_port") or 9001
         self._log = log
-        self._log("[OSC][Info] Initializing OSC Interface...")
+        self._log("INFO:O", "osc_init")
 
         self._disp = dispatcher.Dispatcher()
 

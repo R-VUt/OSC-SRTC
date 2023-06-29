@@ -1,0 +1,55 @@
+{
+  "en" : {
+    "main_initialize" : "Initializing OSC-SRTC...",
+    "main_start_thread" : "Starting OSC-SRTC thread...",
+    "main_recognized" : "Recognized : %{text}",
+    "main_start_translate" : "Starting translation to Target %{phase}...",
+    "main_end_translate" : "Translated : %{text}",
+    "main_execute_extension" : "Executing extensions...",
+    "main_thread_error" : "An error occured while running speech recognition.",
+    "main_stop_thread" : "Stopping OSC-SRTC thread...",
+    "main_start_ptt" : "Push-To-Talk listening...",
+    "main_end_ptt" : "Push-To-Talk finished.",
+
+    "recognizer_language_not_supported" : "Language %{language} is not supported by the selected recognizer.",
+    "translator_language_not_supported" : "Language %{language} is not supported by the selected translator.",
+
+    "recognizer_init" : "Initializing recognizer...",
+    "recognizer_init_api" : "Successfully registered API : %{api}",
+    "listener_ready" : "Listener is ready.",
+    "listener_started" : "Listening started.",
+    "listener_success" : "Listening success.",
+    "listener_stopped" : "Listening stopped.",
+    "listener_stop_requested" : "Stopping listener...",
+    "recognizer_unknown_value_error" : "An error occured while recognizing speech : Unknown value.",
+    "recognizer_request_error" : "An error occured while recognizing speech : API request error.",
+
+    "translator_init" : "Initializing translator...",
+    "translator_init_api" : "Successfully registered API : %{api}",
+
+    "osc_init" : "Initializing OSC Interface...",
+
+    "extension_init" : "Initializing extensions...",
+    "extension_register" : "Registering extension : %{name}",
+    "extension_forward" : "Moving extension %{name} to forward.",
+    "extension_backward" : "Moving extension %{name} to backward.",
+    "extension_test" : "Testing extension %{name}.",
+    "extension_heartbeat_fail" : "Extension %{name} heartbeat failed.",
+    "extension_server_not_respond" : "Extension %{name} server is not responding.",
+
+    "gui_microphone" : "Microphone",
+    "gui_recognizer" : "Speech Recognizer",
+    "gui_translator" : "Translator",
+    "gui_source_language" : "Source",
+    "gui_target_language" : "Target",
+    "gui_target2_language" : "Target2",
+    "gui_romaji_mode" : "Romaji Mode (Japanese)",
+    "gui_start_button" : "Start",
+    "gui_stop_button" : "Stop",
+    "gui_ui_language" : "UI Language",
+    
+    "update_check_msg" : "Found a new version of OSC-SRTC. Do you want to see the booth page?"
+    
+    
+  }
+}

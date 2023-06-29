@@ -68,14 +68,14 @@ class SRTC_Translator:
             "DeepL",
         ]  # now supports Google, DeepL, Papago
         self.__print_log = log
-        self.__print_log("[Translator][Info] Initializing Translator...")
+        self.__print_log("INFO:T", "translator_init")
 
         # Translator Key Settings
         if settings.get("papago_id") and settings.get("papago_secret"):
             self.__Registered_Translators.append("Papago")
             self.__papago_id = settings.get("papago_id")
             self.__papago_secret = settings.get("papago_secret")
-            self.__print_log("[Translator][Info] Papago API is enabled.")
+            self.__print_log("INFO:T", "translator_init_api", api="papago")
         # ----------------------------------------------
 
     def __papago_translate(self, source, target, text):

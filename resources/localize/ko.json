@@ -1,0 +1,53 @@
+{
+  "ko" : {
+    "main_initialize" : "OSC-SRTC를 초기화중이에요...",
+    "main_start_thread" : "OSC-SRTC 스레드를 시작중이에요...",
+    "main_recognized" : "인식 완료 : %{text}",
+    "main_start_translate" : "출력 언어 %{phase}로 번역중이에요...",
+    "main_end_translate" : "번역 완료 : %{text}",
+    "main_execute_extension" : "확장 기능을 실행중이에요....",
+    "main_thread_error" : "음성 인식 도중에 오류가 발생했어요...",
+    "main_stop_thread" : "OSC-SRTC 스레드를 중지중이에요...",
+    "main_start_ptt" : "Push-To-Talk 시작.",
+    "main_end_ptt" : "Push-To-Talk 종료.",
+
+    "recognizer_language_not_supported" : "언어 %{language}(은)는 선택된 음성 인식기에서 지원되지 않아요.",
+    "translator_language_not_supported" : "언어 %{language}(은)는 선택된 번역기에서 지원되지 않아요.",
+
+    "recognizer_init" : "음성 인식 모듈을 초기화중이에요...",
+    "recognizer_init_api" : "음성 인식 API %{api}를 성공적으로 등록했어요.",
+    "listener_ready" : "마이크가 준비되었어요.",
+    "listener_started" : "듣고 있어요...",
+    "listener_success" : "듣기가 완료되었어요.",
+    "listener_stopped" : "듣기가 중지되었어요.",
+    "listener_stop_requested" : "마이크 사용 중지가 요청되었어요.",
+    "recognizer_unknown_value_error" : "음성 인식 중 오류가 발생했어요 : 알 수 없는 값.",
+    "recognizer_request_error" : "음성 인식 중 오류가 발생했어요 : API 요청 오류.",
+
+    "translator_init" : "번역 모듈을 초기화중이에요...",
+    "translator_init_api" : "번역 API %{api}를 성공적으로 등록했어요.",
+
+    "osc_init" : "OSC 모듈 초기화중이에요...",
+
+    "extension_init" : "확장 모듈을 초기화중이에요...",
+    "extension_register" : "확장 기능 %{name}을(를) 등록했어요.",
+    "extension_forward" : "확장 기능 %{name}을(를) 앞으로 이동시키고 있어요...",
+    "extension_backward" : "확장 기능 %{name}을(를) 뒤로 이동시키고 있어요...",
+    "extension_test" : "확장 기능 %{name}을(를) 테스트하고 있어요...",
+    "extension_heartbeat_fail" : "확장 기능 %{name}의 하트비트가 실패했어요.",
+    "extension_server_not_respond" : "확장 기능 %{name}의 서버가 응답하지 않아요.",
+
+    "gui_microphone" : "마이크",
+    "gui_recognizer" : "음성 인식기",
+    "gui_translator" : "번역기",
+    "gui_source_language" : "입력 언어",
+    "gui_target_language" : "출력 언어",
+    "gui_target2_language" : "출력 언어2",
+    "gui_romaji_mode" : "로마자 모드 (일본어)",
+    "gui_start_button" : "시작",
+    "gui_stop_button" : "중지",
+    "gui_ui_language" : "UI 언어",
+
+    "update_check_msg" : "새로운 버전의 OSC-SRTC가 있어요. 부스 페이지를 보시겠어요?"
+  }
+}

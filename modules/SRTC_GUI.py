@@ -64,10 +64,10 @@ class SRTC_GUI(ctk.CTk):
             self._Button_Start.configure(text=i18n.t("gui_start_button"))
         self._option_changed()
 
-    def print_log(self, type: str, i18n_key: str, **kwargs):
+    def print_log(self, msg_type: str, i18n_key: str, **kwargs):
         """Print the log to the log textbox"""
         if self._log_textbox is None:
-            self._log_temp += "[" + type + "] " + i18n.t(i18n_key, kwargs=kwargs) + "\n"
+            self._log_temp += "[" + msg_type + "] " + i18n.t(i18n_key, kwargs=kwargs) + "\n"
         else:
             self._log_textbox.configure(state="normal")
             if not self._log_temp_printed:
@@ -75,7 +75,7 @@ class SRTC_GUI(ctk.CTk):
                 self._log_temp_printed = True
 
             self._log_textbox.insert(
-                "end", "[" + type + "] " + i18n.t(i18n_key, kwargs=kwargs) + "\n"
+                "end", "[" + msg_type + "] " + i18n.t(i18n_key, kwargs=kwargs) + "\n"
             )
             self._log_textbox.see("end")
             self._log_textbox.configure(state="disabled")

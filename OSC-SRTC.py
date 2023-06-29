@@ -12,7 +12,7 @@ from modules.SRTC_Translator import SRTC_Translator
 from modules.SRTC_Extension import SRTC_Extension
 from modules.SRTC_OSC import SRTC_OSC
 
-# sys.stdout = sys.stderr = open(os.devnull, "w")  # noconsole fix
+sys.stdout = sys.stderr = open(os.devnull, "w")  # noconsole fix
 
 Supported_Languages: list[str] = [
     "English",
@@ -189,7 +189,7 @@ def main_thread():
                     GUI.print_log("INFO", "main_execute_extension")
                     to_send_message = Extension.execute_extension(to_send_message)
                     GUI.print_log("INFO", "main_start_sending", text=to_send_message)
-                    GUI.print_log(" ")
+                    GUI.print_log(" ", " ")
                     if to_send_message != "{Sended-Already}":
                         OSC.send("/chatbox/input", [to_send_message, True])
         except Exception:

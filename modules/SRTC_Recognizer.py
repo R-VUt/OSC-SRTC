@@ -218,7 +218,7 @@ class SRTC_Recognizer:
                         "ERROR",
                         "recognizer_unknown_value_error",
                     )
-                except sr.RequestError as e:
+                except sr.RequestError:
                     self.__print_log(
                         "ERROR",
                         "recognizer_request_error",

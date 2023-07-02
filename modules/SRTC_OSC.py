@@ -18,7 +18,7 @@ class SRTC_OSC:
             self._OSC_Send_IP, self._OSC_Send_Port
         )
 
-    def send(self, address: str, *args):
+    def send(self, address: str, args):
         """Send OSC message to the specified address"""
         self._OSC_Client.send_message(address, args)
 

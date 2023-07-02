@@ -10,6 +10,8 @@
     "main_stop_thread" : "OSC-SRTC 스레드를 중지중이에요...",
     "main_start_ptt" : "Push-To-Talk 시작.",
     "main_end_ptt" : "Push-To-Talk 종료.",
+    "main_start_sending" : "OSC 메시지를 전송할게요 : %{text}",
+    
 
     "recognizer_language_not_supported" : "언어 %{language}(은)는 선택된 음성 인식기에서 지원되지 않아요.",
     "translator_language_not_supported" : "언어 %{language}(은)는 선택된 번역기에서 지원되지 않아요.",

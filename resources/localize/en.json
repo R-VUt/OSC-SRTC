@@ -10,6 +10,7 @@
     "main_stop_thread" : "Stopping OSC-SRTC thread...",
     "main_start_ptt" : "Push-To-Talk listening...",
     "main_end_ptt" : "Push-To-Talk finished.",
+    "main_start_sending" : "Sending OSC message : %{text}",
 
     "recognizer_language_not_supported" : "Language %{language} is not supported by the selected recognizer.",
     "translator_language_not_supported" : "Language %{language} is not supported by the selected translator.",

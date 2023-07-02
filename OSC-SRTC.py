@@ -154,6 +154,7 @@ def main_thread():
             to_send_message = ""
 
             if recognized != "":
+                GUI.print_log("START", "--------------------------")
                 GUI.print_log("INFO", "main_recognized", text=recognized)
 
                 if source_lang != target_lang:
@@ -189,11 +190,13 @@ def main_thread():
                     GUI.print_log("INFO", "main_execute_extension")
                     to_send_message = Extension.execute_extension(to_send_message)
                     GUI.print_log("INFO", "main_start_sending", text=to_send_message)
-                    GUI.print_log(" ", " ")
+                    
                     if to_send_message != "{Sended-Already}":
                         OSC.send("/chatbox/input", [to_send_message, True])
+                    GUI.print_log("END", "--------------------------")
         except Exception:
             GUI.print_log("ERR", "main_thread_error")
+            GUI.print_log("END", "--------------------------")
 
 
 def start_main_thread():

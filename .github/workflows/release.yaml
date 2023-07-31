@@ -49,28 +49,15 @@ jobs:
         uses: actions/download-artifact@v1
         with:
           name: SRTC-windows
-
-      - name: Create Release
-        id: create_release
-        uses: actions/create-release@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          tag_name: ${{ github.ref }}
-          release_name: Release ${{ github.ref }}
-          draft: false
-          prerelease: false
-
+          
       - name: Zip
         run: |
           zip --junk-paths SRTC-windows ./SRTC-windows/OSC-SRTC.exe 
 
-      - name: Append Binary
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Release
+        uses: softprops/action-gh-release@v1
         with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./SRTC-windows.zip
-          asset_name: SRTC-windows.zip
-          asset_content_type: application/zip
+          files: ./SRTC-windows.zip
+          body: |
+            # OSC-SRTC release build
+            this build is generated from the tag ${{ github.ref }}

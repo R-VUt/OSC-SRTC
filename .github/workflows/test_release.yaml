@@ -59,6 +59,6 @@ jobs:
         with:
           files: ./SRTC-windows.zip
           body: |
-              "# OSC-SRTC test build"
-              "this build is generated from the tag ${{ github.ref }}"
+              # OSC-SRTC test build
+              this build is generated from the tag ${{ github.ref }}
           prerelease: true

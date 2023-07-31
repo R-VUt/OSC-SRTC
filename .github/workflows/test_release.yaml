@@ -58,7 +58,7 @@ jobs:
         uses: softprops/action-gh-release@v1
         with:
           files: ./SRTC-windows.zip
-          tag_name: ${{ github.ref }}
           body: |
-              Release ${{ github.ref }}
+              "# OSC-SRTC test build"
+              "this build is generated from the tag ${{ github.ref }}"
           prerelease: true
